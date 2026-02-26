@@ -76,24 +76,24 @@ const Dashboard = () => {
                 />
                 <KPICard
                     title="Providers Saved"
-                    value={5}
-                    trend="+1 new"
+                    value={8}
+                    trend="+3 new"
                     icon={<Bookmark size={24} />}
                     iconBgColor="bg-purple-500/10"
                     iconColor="text-purple-500"
                 />
                 <KPICard
                     title="Risk Level"
-                    value="Low" // This will be handled as 0 in counter then manual override or just show "Low"
+                    value="Medium"
                     trend="Stable"
                     icon={<Shield size={24} />}
                     iconBgColor="bg-amber-500/10"
                     iconColor="text-amber-500"
                 />
                 <KPICard
-                    title="Health Credits"
-                    value={450}
-                    trend="+50 pts"
+                    title="Estimated Savings"
+                    value={12500}
+                    trend="+₹1,250"
                     isCurrency={true}
                     icon={<PiggyBank size={24} />}
                     iconBgColor="bg-primary-teal/10"
@@ -106,7 +106,7 @@ const Dashboard = () => {
                 <motion.div
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
-                    className="lg:col-span-2 card-premium p-8"
+                    className="lg:col-span-2 card-premium backdrop-blur-md bg-white/70 border border-white/20 shadow-xl shadow-primary-teal/5 p-8"
                 >
                     <div className="flex justify-between items-start mb-10">
                         <div>
@@ -114,10 +114,10 @@ const Dashboard = () => {
                             <p className="text-sm text-health-text-secondary">Based on provider selection vs. market average</p>
                         </div>
                         <div className="text-right">
-                            <h3 className="text-3xl font-bold text-primary-navy tabular-nums">$1,250</h3>
+                            <h3 className="text-3xl font-bold text-primary-navy tabular-nums">₹12,500</h3>
                             <p className="text-xs font-bold text-health-success flex items-center justify-end">
                                 <TrendingUp size={14} className="mr-1" />
-                                +15% vs last 6 months
+                                +15% vs regional avg
                             </p>
                         </div>
                     </div>
@@ -166,7 +166,7 @@ const Dashboard = () => {
                 <motion.div
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
-                    className="card-premium p-8 flex flex-col items-center text-center justify-between"
+                    className="card-premium backdrop-blur-md bg-white/70 border border-white/20 shadow-xl shadow-primary-teal/5 p-8 flex flex-col items-center text-center justify-between"
                 >
                     <div className="w-full">
                         <h4 className="text-lg font-bold text-primary-navy mb-1">Cost Risk Analysis</h4>
@@ -210,7 +210,7 @@ const Dashboard = () => {
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="lg:col-span-2 card-premium overflow-hidden shadow-xl"
+                    className="lg:col-span-2 card-premium backdrop-blur-md bg-white/70 border border-white/20 shadow-xl shadow-primary-teal/5 overflow-hidden shadow-xl"
                 >
                     <div className="p-6 border-b border-health-border flex justify-between items-center">
                         <h4 className="text-lg font-bold text-primary-navy">Saved Providers</h4>
@@ -267,7 +267,7 @@ const Dashboard = () => {
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="card-premium p-8 flex flex-col"
+                    className="card-premium backdrop-blur-md bg-white/70 border border-white/20 shadow-xl shadow-primary-teal/5 p-8 flex flex-col"
                 >
                     <div className="flex justify-between items-center mb-8">
                         <h4 className="text-lg font-bold text-primary-navy">Recent Searches</h4>

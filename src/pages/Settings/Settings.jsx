@@ -7,12 +7,39 @@ import {
 } from 'lucide-react';
 import ToggleSwitch from '../../components/ToggleSwitch/ToggleSwitch';
 
+import useAuthStore from '../../stores/useAuthStore';
+import { useNavigate } from 'react-router-dom';
+
 const Settings = () => {
+    const { user } = useAuthStore();
+    const navigate = useNavigate();
+    const [isSaving, setIsSaving] = useState(false);
+    const [saveSuccess, setSaveSuccess] = useState(false);
+
+    const [profile, setProfile] = useState({
+        firstName: user?.displayName?.split(' ')[0] || 'Sarah',
+        lastName: user?.displayName?.split(' ')[1] || 'Kapoor',
+        email: user?.email || 'sarah.k@example.com',
+        phone: '+91 98765 43210',
+        address: '42, Health Enclave, Sector 15, Gurgaon, HR 122001'
+    });
+
     const [notifications, setNotifications] = useState({
         estimates: true,
         appointments: true,
         marketing: false,
     });
+
+    const handleSave = (e) => {
+        e.preventDefault();
+        setIsSaving(true);
+        // Simulate API call
+        setTimeout(() => {
+            setIsSaving(false);
+            setSaveSuccess(true);
+            setTimeout(() => setSaveSuccess(false), 3000);
+        }, 1000);
+    };
 
     const menuItems = [
         { id: 'profile', label: 'Profile Settings', icon: <User size={18} />, active: true },
@@ -55,8 +82,8 @@ const Settings = () => {
                                 <button
                                     key={item.id}
                                     className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all ${item.active
-                                            ? 'bg-primary-teal/5 text-primary-teal font-bold'
-                                            : 'text-health-text-secondary hover:bg-health-bg'
+                                        ? 'bg-primary-teal/5 text-primary-teal font-bold'
+                                        : 'text-health-text-secondary hover:bg-health-bg'
                                         }`}
                                 >
                                     <span className={item.active ? 'text-primary-teal' : 'text-health-text-muted'}>
@@ -115,26 +142,46 @@ const Settings = () => {
                             <button className="text-sm font-bold text-primary-teal hover:underline">Edit details</button>
                         </div>
 
-                        <form className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <form onSubmit={handleSave} className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
                                 <label className="block text-xs font-bold text-health-text-muted uppercase tracking-widest mb-2">First Name</label>
-                                <input type="text" defaultValue="Alex" className="input-standard !py-2.5" />
+                                <input
+                                    type="text"
+                                    value={profile.firstName}
+                                    onChange={(e) => setProfile({ ...profile, firstName: e.target.value })}
+                                    className="input-standard !py-2.5"
+                                />
                             </div>
                             <div>
                                 <label className="block text-xs font-bold text-health-text-muted uppercase tracking-widest mb-2">Last Name</label>
-                                <input type="text" defaultValue="Morgan" className="input-standard !py-2.5" />
+                                <input
+                                    type="text"
+                                    value={profile.lastName}
+                                    onChange={(e) => setProfile({ ...profile, lastName: e.target.value })}
+                                    className="input-standard !py-2.5"
+                                />
                             </div>
                             <div className="relative">
                                 <label className="block text-xs font-bold text-health-text-muted uppercase tracking-widest mb-2">Email Address</label>
                                 <div className="relative">
-                                    <input type="email" defaultValue="alex.morgan@example.com" className="input-standard !py-2.5 pr-10" />
+                                    <input
+                                        type="email"
+                                        value={profile.email}
+                                        onChange={(e) => setProfile({ ...profile, email: e.target.value })}
+                                        className="input-standard !py-2.5 pr-10"
+                                    />
                                     <Mail className="absolute right-3 top-1/2 -translate-y-1/2 text-health-text-muted" size={16} />
                                 </div>
                             </div>
                             <div>
                                 <label className="block text-xs font-bold text-health-text-muted uppercase tracking-widest mb-2">Phone Number</label>
                                 <div className="relative">
-                                    <input type="text" defaultValue="+1 (555) 123-4567" className="input-standard !py-2.5 pr-10" />
+                                    <input
+                                        type="text"
+                                        value={profile.phone}
+                                        onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
+                                        className="input-standard !py-2.5 pr-10"
+                                    />
                                     <Phone className="absolute right-3 top-1/2 -translate-y-1/2 text-health-text-muted" size={16} />
                                 </div>
                             </div>
@@ -143,17 +190,25 @@ const Settings = () => {
                                 <div className="relative">
                                     <input
                                         type="text"
-                                        defaultValue="123 Healthway Blvd, Suite 400, San Francisco, CA 94105"
+                                        value={profile.address}
+                                        onChange={(e) => setProfile({ ...profile, address: e.target.value })}
                                         className="input-standard !py-2.5 pr-10"
                                     />
                                     <Home className="absolute right-3 top-1/2 -translate-y-1/2 text-health-text-muted" size={16} />
                                 </div>
                             </div>
 
-                            <div className="md:col-span-2 flex justify-end">
-                                <button className="btn-primary flex items-center space-x-2">
+                            <div className="md:col-span-2 flex justify-end items-center space-x-4">
+                                {saveSuccess && (
+                                    <span className="text-health-success text-sm font-bold">Changes saved successfully!</span>
+                                )}
+                                <button
+                                    type="submit"
+                                    disabled={isSaving}
+                                    className="btn-primary flex items-center space-x-2 disabled:opacity-50"
+                                >
                                     <Save size={18} />
-                                    <span>Save Changes</span>
+                                    <span>{isSaving ? 'Saving...' : 'Save Changes'}</span>
                                 </button>
                             </div>
                         </form>

@@ -150,10 +150,10 @@ const PatientProfile = () => {
                             </button>
                             <button
                                 type="button"
-                                onClick={() => navigate('/cost-estimator/step-2')}
+                                onClick={() => navigate('/cost-estimator/results')}
                                 className="btn-primary flex items-center space-x-2"
                             >
-                                <span>Continue to Medical History</span>
+                                <span>Generate Accuracy Estimate</span>
                                 <ChevronRight size={18} />
                             </button>
                         </div>
