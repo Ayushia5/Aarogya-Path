@@ -24,14 +24,13 @@ const Navbar = () => {
     const navLinks = isLoggedIn
         ? [
             { name: 'Dashboard', path: '/dashboard', icon: <LayoutDashboard size={18} /> },
-            { name: 'Search Costs', path: '/cost-estimator/step-1', icon: <SearchIcon size={18} /> },
-            { name: 'My Providers', path: '/providers/saved', icon: <Users size={18} /> },
-            { name: 'Accountability', path: '/accountability', icon: <ShieldCheck size={18} /> },
+            { name: 'Cost Risk Estimator', path: '/cost-estimator/step-1', icon: <SearchIcon size={18} /> },
+            { name: 'Find Providers', path: '/providers', icon: <Users size={18} /> },
         ]
         : [
+            { name: 'How It Works', path: '#how-it-works' },
             { name: 'Providers', path: '/providers' },
-            { name: 'Patients', path: '/patients' },
-            { name: 'Enterprise', path: '/enterprise' },
+            { name: 'About', path: '/about' },
         ];
 
     const navbarClasses = `fixed top-0 w-full z-50 transition-all duration-300 ${isScrolled

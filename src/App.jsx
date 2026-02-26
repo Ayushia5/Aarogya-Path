@@ -13,6 +13,7 @@ const Providers = lazy(() => import('./pages/Providers/Providers'));
 const Settings = lazy(() => import('./pages/Settings/Settings'));
 const CostEstimator = lazy(() => import('./pages/CostEstimator/CostEstimator'));
 const ProviderDetail = lazy(() => import('./pages/Providers/ProviderDetail'));
+const About = lazy(() => import('./pages/About'));
 
 // Loading component
 const PageSkeleton = () => (
@@ -44,6 +45,7 @@ function App() {
             <Route path="/signup" element={<Signup />} />
             <Route path="/providers" element={<Providers />} />
             <Route path="/providers/:id" element={<ProviderDetail />} />
+            <Route path="/about" element={<About />} />
 
             {/* Protected Routes */}
             <Route

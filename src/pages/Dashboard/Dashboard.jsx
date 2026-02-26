@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
     Plus, Grid, Bookmark, Shield, PiggyBank,
@@ -12,7 +12,7 @@ import {
 import KPICard from '../../components/KPICard/KPICard';
 import RiskGauge from '../../components/RiskGauge/RiskGauge';
 
-const chartData = [
+const initialChartData = [
     { name: 'JAN', value: 400 },
     { name: 'FEB', value: 600 },
     { name: 'MAR', value: 550 },
@@ -21,19 +21,36 @@ const chartData = [
     { name: 'JUN', value: 1250 },
 ];
 
-const savedProviders = [
-    { id: 1, name: 'Dr. Emily Chen', specialty: 'Orthopedics', cost: '$2,150', quality: 'High', color: 'bg-health-success/10 text-health-success border-health-success/20' },
-    { id: 2, name: 'Dr. Michael Ross', specialty: 'Cardiology', cost: '$1,850', quality: 'High', color: 'bg-health-success/10 text-health-success border-health-success/20' },
-    { id: 3, name: 'Summit Medical', specialty: 'Imaging Center', cost: '$450', quality: 'Avg', color: 'bg-health-warning/10 text-health-warning border-health-warning/20' },
-];
-
-const recentSearches = [
-    { id: 1, procedure: 'MRI Lumbar Spine', context: 'Near San Francisco, CA', range: '$450–$1.2k', time: '2h ago' },
-    { id: 2, procedure: 'Physical Therapy', context: 'Post-op Knee', range: '$75–$150', time: '1d ago' },
-    { id: 3, procedure: 'Dermatology Consult', context: 'Video Visit', range: '$90–$200', time: '3d ago' },
-];
-
 const Dashboard = () => {
+    const [data, setData] = useState(initialChartData);
+
+    const savedProviders = [
+        { id: 1, name: 'Dr. Emily Chen', specialty: 'Orthopedics', cost: '$2,150', quality: 'High', color: 'bg-health-success/10 text-health-success border-health-success/20' },
+        { id: 2, name: 'Dr. Michael Ross', specialty: 'Cardiology', cost: '$1,850', quality: 'High', color: 'bg-health-success/10 text-health-success border-health-success/20' },
+        { id: 3, name: 'Summit Medical', specialty: 'Imaging Center', cost: '$450', quality: 'Avg', color: 'bg-health-warning/10 text-health-warning border-health-warning/20' },
+    ];
+
+    const recentSearches = [
+        { id: 1, procedure: 'MRI Lumbar Spine', context: 'Near San Francisco, CA', range: '$450–$1.2k', time: '2h ago' },
+        { id: 2, procedure: 'Physical Therapy', context: 'Post-op Knee', range: '$75–$150', time: '1d ago' },
+        { id: 3, procedure: 'Dermatology Consult', context: 'Video Visit', range: '$90–$200', time: '3d ago' },
+    ];
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setData(prevData => {
+                const lastVal = prevData[prevData.length - 1].value;
+                const newVal = Math.max(0, lastVal + (Math.random() - 0.45) * 100);
+                const nextData = [...prevData.slice(1), {
+                    name: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+                    value: Math.round(newVal)
+                }];
+                return nextData;
+            });
+        }, 3000);
+
+        return () => clearInterval(interval);
+    }, []);
     return (
         <div className="max-w-7xl mx-auto px-4 py-10 space-y-10">
             {/* Header section */}
@@ -108,7 +125,7 @@ const Dashboard = () => {
 
                     <div className="h-64 w-full">
                         <ResponsiveContainer width="100%" height="100%">
-                            <AreaChart data={chartData}>
+                            <AreaChart data={data}>
                                 <defs>
                                     <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
                                         <stop offset="5%" stopColor="#0B9E9E" stopOpacity={0.1} />

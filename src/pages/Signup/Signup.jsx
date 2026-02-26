@@ -244,21 +244,14 @@ const Signup = () => {
                             </span>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 gap-4">
                             <button
                                 type="button"
                                 onClick={handleGoogleLogin}
-                                className="flex items-center justify-center space-x-2 py-2.5 border border-health-border rounded-xl hover:bg-health-bg transition-colors font-semibold text-health-text-secondary text-sm"
+                                className="flex items-center justify-center space-x-2 py-2.5 border border-health-border rounded-xl hover:bg-health-bg transition-colors font-semibold text-health-text-secondary text-sm w-full"
                             >
                                 <Chrome size={16} className="text-health-danger" />
-                                <span>Google</span>
-                            </button>
-                            <button
-                                type="button"
-                                className="flex items-center justify-center space-x-2 py-2.5 border border-health-border rounded-xl hover:bg-health-bg transition-colors font-semibold text-health-text-secondary text-sm"
-                            >
-                                <Github size={16} className="text-primary-navy" />
-                                <span>GitHub</span>
+                                <span>Continue with Google</span>
                             </button>
                         </div>
 
