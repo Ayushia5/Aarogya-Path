@@ -20,8 +20,8 @@ const sampleProviders = [
 
 const FilterPill = ({ label, active = false }) => (
     <button className={`px-4 py-2 rounded-full border text-sm font-semibold flex items-center space-x-2 transition-all ${active
-            ? 'bg-primary-teal/5 border-primary-teal text-primary-teal'
-            : 'bg-white border-health-border text-health-text-secondary hover:border-health-text-muted'
+        ? 'bg-primary-teal/5 border-primary-teal text-primary-teal'
+        : 'bg-white border-health-border text-health-text-secondary hover:border-health-text-muted'
         }`}>
         <span>{label}</span>
         <ChevronDown size={14} className={active ? 'text-primary-teal' : 'text-health-text-muted'} />
@@ -48,15 +48,8 @@ const Providers = () => {
             {/* Filter Row */}
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-10 pb-6 border-b border-health-border">
                 <div className="flex flex-wrap gap-3">
-                    <FilterPill label="Region" active={true} />
-                    <FilterPill label="Specialty" />
-                    <FilterPill label="Rating" />
-                    <FilterPill label="Availability" />
-
-                    <button className="flex items-center space-x-2 px-4 py-2 text-primary-teal font-bold text-sm hover:underline">
-                        <SlidersHorizontal size={14} />
-                        <span>More Filters</span>
-                    </button>
+                    <FilterPill label="All Specialists" active={true} />
+                    <FilterPill label="Top Rated" />
                 </div>
 
                 <div className="flex items-center space-x-4">
@@ -79,28 +72,15 @@ const Providers = () => {
 
             {/* Provider Grid */}
             <div className={`grid gap-8 ${viewMode === 'grid'
-                    ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-4'
-                    : 'grid-cols-1'
+                ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-4'
+                : 'grid-cols-1'
                 }`}>
                 {sampleProviders.map((provider, index) => (
                     <ProviderCard key={provider.id} provider={provider} index={index} />
                 ))}
             </div>
 
-            {/* Load More */}
-            <div className="mt-16 flex justify-center">
-                <motion.button
-                    whileHover={{ y: 2 }}
-                    className="flex flex-col items-center group"
-                >
-                    <span className="text-sm font-bold text-health-text-muted group-hover:text-primary-teal transition-colors mb-2">
-                        Load More Providers
-                    </span>
-                    <div className="w-10 h-10 rounded-full border-2 border-health-border flex items-center justify-center text-health-text-muted group-hover:border-primary-teal group-hover:text-primary-teal transition-all">
-                        <ChevronDown size={20} />
-                    </div>
-                </motion.button>
-            </div>
+            {/* Load More removed for clean flow */}
         </div>
     );
 };

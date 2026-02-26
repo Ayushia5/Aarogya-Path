@@ -3,15 +3,16 @@ import { motion } from 'framer-motion';
 import { User, DollarSign, Info, ChevronRight } from 'lucide-react';
 import StepProgress from '../../components/StepProgress/StepProgress';
 import { useNavigate } from 'react-router-dom';
+import useEstimatorStore from '../../stores/useEstimatorStore';
 
 const PatientProfile = () => {
-    const navigate = useNavigate();
-    const [income, setIncome] = useState(75000);
+    const { patientData, setPatientData } = useEstimatorStore();
+    const income = patientData.income || 75000;
 
     const formatCurrency = (val) => {
-        return new Intl.NumberFormat('en-US', {
+        return new Intl.NumberFormat('en-IN', {
             style: 'currency',
-            currency: 'USD',
+            currency: 'INR',
             maximumFractionDigits: 0,
         }).format(val);
     };
@@ -102,13 +103,13 @@ const PatientProfile = () => {
                                         max="250000"
                                         step="5000"
                                         value={income}
-                                        onChange={(e) => setIncome(Number(e.target.value))}
+                                        onChange={(e) => setPatientData({ income: Number(e.target.value) })}
                                         className="w-full h-2 bg-health-border rounded-full appearance-none cursor-pointer accent-primary-teal"
                                     />
                                     <div className="flex justify-between mt-2 text-[10px] font-bold text-health-text-muted uppercase tracking-wider">
-                                        <span>$0</span>
-                                        <span>$125k</span>
-                                        <span>$250k+</span>
+                                        <span>₹0</span>
+                                        <span>₹12.5L</span>
+                                        <span>₹25L+</span>
                                     </div>
                                 </div>
 

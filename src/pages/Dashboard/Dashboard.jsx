@@ -41,8 +41,11 @@ const Dashboard = () => {
             setData(prevData => {
                 const lastVal = prevData[prevData.length - 1].value;
                 const newVal = Math.max(0, lastVal + (Math.random() - 0.45) * 100);
+                const now = new Date();
+                const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
                 const nextData = [...prevData.slice(1), {
-                    name: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+                    name: timeStr,
                     value: Math.round(newVal)
                 }];
                 return nextData;
@@ -59,10 +62,6 @@ const Dashboard = () => {
                     <h1 className="text-4xl font-bold text-primary-navy tracking-tight mb-2">Welcome back, Sarah</h1>
                     <p className="text-health-text-secondary text-lg">Here is your healthcare cost and risk overview for this month.</p>
                 </div>
-                <button className="btn-primary flex items-center space-x-2 px-6 py-3 shadow-xl shadow-primary-teal/20">
-                    <Plus size={20} />
-                    <span className="font-bold">New Estimate</span>
-                </button>
             </div>
 
             {/* KPI Cards Grid */}
@@ -138,6 +137,7 @@ const Dashboard = () => {
                                     axisLine={false}
                                     tickLine={false}
                                     tick={{ fill: '#9AAAB8', fontSize: 10, fontWeight: 700 }}
+                                    interval="preserveStartEnd"
                                 />
                                 <YAxis hide={true} />
                                 <Tooltip

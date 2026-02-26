@@ -28,9 +28,8 @@ const Navbar = () => {
             { name: 'Find Providers', path: '/providers', icon: <Users size={18} /> },
         ]
         : [
-            { name: 'How It Works', path: '#how-it-works' },
+            { name: 'How It Works', path: '/#how-it-works' },
             { name: 'Providers', path: '/providers' },
-            { name: 'About', path: '/about' },
         ];
 
     const navbarClasses = `fixed top-0 w-full z-50 transition-all duration-300 ${isScrolled
@@ -157,9 +156,6 @@ const Navbar = () => {
                             </div>
                         ) : (
                             <div className="hidden md:flex items-center space-x-6">
-                                <Link to="/contact" className="text-sm font-medium text-health-text-secondary hover:text-primary-teal transition-colors">
-                                    Contact Support
-                                </Link>
                                 <Link to="/signup" className="btn-outline !py-1.5 !px-5 text-sm">
                                     Sign Up
                                 </Link>
