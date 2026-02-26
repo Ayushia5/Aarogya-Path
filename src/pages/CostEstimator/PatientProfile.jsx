@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import useEstimatorStore from '../../stores/useEstimatorStore';
 
 const PatientProfile = () => {
+    const navigate = useNavigate();
     const { patientData, setPatientData } = useEstimatorStore();
     const income = patientData.income || 75000;
 

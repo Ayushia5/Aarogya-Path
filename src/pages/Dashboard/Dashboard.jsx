@@ -13,12 +13,12 @@ import KPICard from '../../components/KPICard/KPICard';
 import RiskGauge from '../../components/RiskGauge/RiskGauge';
 
 const initialChartData = [
-    { name: 'JAN', value: 400 },
-    { name: 'FEB', value: 600 },
-    { name: 'MAR', value: 550 },
-    { name: 'APR', value: 900 },
-    { name: 'MAY', value: 1100 },
-    { name: 'JUN', value: 1250 },
+    { name: '23:15', value: 400 },
+    { name: '23:20', value: 600 },
+    { name: '23:25', value: 550 },
+    { name: '23:30', value: 900 },
+    { name: '23:35', value: 1100 },
+    { name: '23:40', value: 1250 },
 ];
 
 const Dashboard = () => {
@@ -297,14 +297,9 @@ const Dashboard = () => {
                             </div>
                         ))}
                     </div>
-
-                    <button className="mt-10 w-full py-3 rounded-xl border-2 border-health-border text-sm font-bold text-health-text-secondary hover:border-primary-teal hover:text-primary-teal transition-all flex items-center justify-center space-x-2">
-                        <span>View Search History</span>
-                        <ChevronRight size={16} />
-                    </button>
                 </motion.div>
-            </div>
-        </div>
+            </div >
+        </div >
     );
 };
 

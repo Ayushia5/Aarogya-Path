@@ -5,19 +5,22 @@ import {
     HelpCircle, AlertTriangle, CheckCircle2,
     Calendar, CreditCard
 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
+import useEstimatorStore from '../../stores/useEstimatorStore';
 import RiskGauge from '../../components/RiskGauge/RiskGauge';
 import CostComparisonCard from '../../components/CostComparisonCard/CostComparisonCard';
 import AlertBanner from '../../components/AlertBanner/AlertBanner';
 
 const Results = () => {
-    const navigate = useNavigate();
+    const { selectedProcedures } = useEstimatorStore();
 
-    const selectedProcedures = [
-        { name: 'ECG', cost: '$450 - $1,200' },
-        { name: 'Cardiac Catheterization', cost: '$2,800 - $4,500' },
-        { name: 'Angioplasty', cost: '$950 - $1,100' },
-    ];
+    // Map procedure names to cost ranges for display
+    const procedureData = selectedProcedures.map(name => ({
+        name,
+        cost: name === 'ECG' ? '₹4,500 - ₹12,000' :
+            name === 'Cardiac Catheterization' ? '₹28,000 - ₹45,000' :
+                name === 'Angioplasty' ? '₹9,500 - ₹11,000' : '₹5,000 - ₹15,000'
+    }));
 
     return (
         <div className="max-w-7xl mx-auto px-4 py-8 pb-20">
@@ -54,11 +57,11 @@ const Results = () => {
                         </div>
                         <div className="flex justify-between text-sm py-2 border-b border-health-border">
                             <span className="text-health-text-secondary">Regional Avg.</span>
-                            <span className="font-bold text-primary-navy">$5,200</span>
+                            <span className="font-bold text-primary-navy">₹52,000</span>
                         </div>
                         <div className="flex justify-between text-sm py-2">
                             <span className="text-health-text-secondary">Potential Savings</span>
-                            <span className="font-bold text-primary-teal">$1,250</span>
+                            <span className="font-bold text-primary-teal">₹12,500</span>
                         </div>
                     </div>
                     <p className="mt-8 text-xs text-health-text-muted">
@@ -77,12 +80,12 @@ const Results = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <CostComparisonCard
                             type="public"
-                            priceRange="$4,200 - $6,800"
+                            priceRange="₹42,000 - ₹68,000"
                             isBestValue={true}
                         />
                         <CostComparisonCard
                             type="private"
-                            priceRange="$12,500 - $18,000"
+                            priceRange="₹1,25,000 - ₹1,80,000"
                             isBestValue={false}
                         />
                     </div>
@@ -109,7 +112,7 @@ const Results = () => {
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-health-border">
-                                    {selectedProcedures.map((proc, idx) => (
+                                    {procedureData.map((proc, idx) => (
                                         <tr key={idx} className="hover:bg-health-bg/20 transition-colors">
                                             <td className="px-6 py-4">
                                                 <div className="flex items-center space-x-3">
@@ -184,10 +187,5 @@ const Results = () => {
         </div>
     );
 };
-
-// Simple Link mock as lucide doesn't have it and router might not be used everywhere for this snippet
-const Link = ({ to, children, className }) => (
-    <a href={to} className={className}>{children}</a>
-);
 
 export default Results;

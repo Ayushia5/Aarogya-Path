@@ -41,7 +41,7 @@ const Providers = () => {
                     <p className="text-health-text-secondary text-lg">Compare highly rated specialized healthcare providers in your region.</p>
                 </div>
                 <div className="text-sm font-bold text-health-text-muted uppercase tracking-widest">
-                    Showing <span className="text-primary-navy">124 results</span>
+                    Showing <span className="text-primary-navy">{sampleProviders.length} results</span>
                 </div>
             </div>
 

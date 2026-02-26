@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { useNavigate, Link } from 'react-router-dom';
 import ProcedureChip from '../../components/ProcedureChip/ProcedureChip';
+import useEstimatorStore from '../../stores/useEstimatorStore';
 
 const categories = [
     { id: 'cardiology', name: 'Cardiology', icon: <Heart size={18} />, count: 12 },
@@ -26,17 +27,10 @@ const cardiologyProcedures = {
 
 const SelectProcedures = () => {
     const navigate = useNavigate();
+    const { selectedProcedures, toggleProcedure } = useEstimatorStore();
     const [selectedCategory, setSelectedCategory] = useState('cardiology');
-    const [selectedProcedures, setSelectedProcedures] = useState(['ECG', 'Cardiac Catheterization', 'Angioplasty']);
     const [searchQuery, setSearchQuery] = useState('');
 
-    const toggleProcedure = (name) => {
-        setSelectedProcedures(prev =>
-            prev.includes(name)
-                ? prev.filter(p => p !== name)
-                : [...prev, name]
-        );
-    };
 
     return (
         <div className="max-w-7xl mx-auto px-4 py-8 pb-32">
@@ -83,8 +77,8 @@ const SelectProcedures = () => {
                                     key={cat.id}
                                     onClick={() => setSelectedCategory(cat.id)}
                                     className={`w-full flex items-center justify-between p-3 rounded-xl transition-all ${selectedCategory === cat.id
-                                            ? 'bg-primary-teal/5 text-primary-teal border-l-4 border-primary-teal font-bold'
-                                            : 'text-health-text-secondary hover:bg-health-bg'
+                                        ? 'bg-primary-teal/5 text-primary-teal border-l-4 border-primary-teal font-bold'
+                                        : 'text-health-text-secondary hover:bg-health-bg'
                                         }`}
                                 >
                                     <div className="flex items-center space-x-3">
@@ -163,7 +157,7 @@ const SelectProcedures = () => {
                                 <TrendingDown size={24} />
                             </div>
                             <h5 className="font-bold text-primary-navy mb-2">Potential Savings</h5>
-                            <p className="text-xs text-health-text-secondary">Users save an average of $450 by comparing regional providers.</p>
+                            <p className="text-xs text-health-text-secondary">Users save an average of ₹45,000 by comparing regional providers.</p>
                         </div>
                     </div>
                 </main>
