@@ -1,55 +1,30 @@
-import React, { useEffect, useRef } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
 import {
-    ChevronLeft, Download,
-    CheckCircle2, Calendar, CreditCard
+    ChevronLeft, Download, Share2,
+    HelpCircle, AlertTriangle, CheckCircle2,
+    Calendar, CreditCard
 } from 'lucide-react';
 import { useNavigate, Link } from 'react-router-dom';
 import useEstimatorStore from '../../stores/useEstimatorStore';
 import RiskGauge from '../../components/RiskGauge/RiskGauge';
 import CostComparisonCard from '../../components/CostComparisonCard/CostComparisonCard';
 import AlertBanner from '../../components/AlertBanner/AlertBanner';
-import { db, auth } from '../../services/firebaseConfig';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
 const Results = () => {
     const { selectedProcedures } = useEstimatorStore();
-    const navigate = useNavigate();
-    const hasSaved = useRef(false);
-
-    useEffect(() => {
-        const saveEstimate = async () => {
-            if (hasSaved.current || !auth.currentUser || selectedProcedures.length === 0) return;
-
-            try {
-                hasSaved.current = true;
-                await addDoc(collection(db, 'estimates'), {
-                    userId: auth.currentUser.uid,
-                    procedures: selectedProcedures,
-                    createdAt: serverTimestamp(),
-                    type: 'cost_estimate'
-                });
-                console.log("Estimate saved successfully");
-            } catch (err) {
-                console.error("Error saving estimate:", err);
-                hasSaved.current = false;
-            }
-        };
-
-        saveEstimate();
-    }, [selectedProcedures]);
 
     // Map procedure names to cost ranges for display
     const procedureData = selectedProcedures.map(name => ({
         name,
-        cost: name === 'ECG' ? '₹500 - ₹1,200' :
-            name === 'Cardiac Catheterization' ? '₹3,500 - ₹5,500' :
-                name === 'Angioplasty' ? '₹11,500 - ₹13,500' : '₹800 - ₹2,500'
+        cost: name === 'ECG' ? '₹4,500 - ₹12,000' :
+            name === 'Cardiac Catheterization' ? '₹28,000 - ₹45,000' :
+                name === 'Angioplasty' ? '₹9,500 - ₹11,000' : '₹5,000 - ₹15,000'
     }));
 
     return (
         <div className="max-w-7xl mx-auto px-4 py-8 pb-20">
-            <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 space-y-4 md:space-y-0 print:hidden">
+            <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 space-y-4 md:space-y-0">
                 <div>
                     <h1 className="text-4xl font-bold text-primary-navy tracking-tight mb-2">Estimation Results</h1>
                     <p className="text-health-text-secondary">Based on your selected procedures and insurance profile.</p>
@@ -57,43 +32,13 @@ const Results = () => {
                 <div className="flex items-center space-x-3">
                     <button
                         onClick={() => window.print()}
-                        className="flex items-center space-x-2 px-4 py-2 bg-white border border-health-border rounded-xl text-sm font-semibold text-health-text-secondary hover:bg-health-bg transition-all shadow-sm"
+                        className="flex items-center space-x-2 px-4 py-2 bg-white border border-health-border rounded-xl text-sm font-semibold text-health-text-secondary hover:bg-health-bg transition-all no-print"
                     >
                         <Download size={16} />
                         <span>PDF Export</span>
                     </button>
                 </div>
             </div>
-
-            <style dangerouslySetInnerHTML={{
-                __html: `
-                @media print {
-                    @page { margin: 20mm; }
-                    body { background: white !important; }
-                    .print\\:hidden, 
-                    nav, 
-                    footer, 
-                    button,
-                    .btn-primary,
-                    .btn-outline,
-                    aside,
-                    .sticky,
-                    #navbar-id,
-                    #footer-id { 
-                        display: none !important; 
-                    }
-                    .card-premium {
-                        box-shadow: none !important;
-                        border: 1px solid #e2e8f0 !important;
-                        break-inside: avoid;
-                    }
-                    .max-w-7xl {
-                        max-width: 100% !important;
-                        padding: 0 !important;
-                        margin: 0 !important;
-                    }
-                }
-            ` }} />
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* Risk Analysis Card */}
@@ -111,11 +56,11 @@ const Results = () => {
                         </div>
                         <div className="flex justify-between text-sm py-2 border-b border-health-border">
                             <span className="text-health-text-secondary">Regional Avg.</span>
-                            <span className="font-bold text-primary-navy">₹6,500</span>
+                            <span className="font-bold text-primary-navy">₹52,000</span>
                         </div>
                         <div className="flex justify-between text-sm py-2">
                             <span className="text-health-text-secondary">Potential Savings</span>
-                            <span className="font-bold text-primary-teal">₹1,500</span>
+                            <span className="font-bold text-primary-teal">₹12,500</span>
                         </div>
                     </div>
                     <p className="mt-8 text-xs text-health-text-muted">
@@ -134,12 +79,12 @@ const Results = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <CostComparisonCard
                             type="public"
-                            priceRange="₹4,800 - ₹8,200"
+                            priceRange="₹42,000 - ₹68,000"
                             isBestValue={true}
                         />
                         <CostComparisonCard
                             type="private"
-                            priceRange="₹14,500 - ₹22,000"
+                            priceRange="₹1,25,000 - ₹1,80,000"
                             isBestValue={false}
                         />
                     </div>
@@ -215,7 +160,7 @@ const Results = () => {
             </div>
 
             {/* Footer Navigation */}
-            <div className="flex justify-between items-center mt-12 pt-8 border-t border-health-border print:hidden">
+            <div className="flex justify-between items-center mt-12 pt-8 border-t border-health-border">
                 <button
                     onClick={() => navigate('/cost-estimator/step-2')}
                     className="flex items-center space-x-2 text-health-text-secondary font-semibold hover:text-primary-navy transition-colors"
@@ -224,7 +169,12 @@ const Results = () => {
                     <span>Back to Procedures</span>
                 </button>
                 <div className="flex items-center space-x-4">
-
+                    <button
+                        onClick={() => navigate('/providers')}
+                        className="btn-outline !py-2.5"
+                    >
+                        Find Local Providers
+                    </button>
                     <button
                         onClick={() => navigate('/dashboard')}
                         className="btn-primary !py-2.5"
@@ -233,6 +183,28 @@ const Results = () => {
                     </button>
                 </div>
             </div>
+
+            <style dangerouslySetInnerHTML={{
+                __html: `
+                @media print {
+                    .no-print, nav, footer, button, .btn-primary, .btn-outline {
+                        display: none !important;
+                    }
+                    .card-premium {
+                        box-shadow: none !important;
+                        border: 1px solid #E2E8F0 !important;
+                    }
+                    body {
+                        background: white !important;
+                        padding: 0 !important;
+                    }
+                    .max-w-7xl {
+                        max-width: 100% !important;
+                        width: 100% !important;
+                        padding: 0 !important;
+                    }
+                }
+            `}} />
         </div>
     );
 };

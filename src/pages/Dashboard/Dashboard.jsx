@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { collection, query, where, getCountFromServer } from 'firebase/firestore';
 import { motion } from 'framer-motion';
 import {
     Grid, Bookmark, Shield, PiggyBank,
-    TrendingUp, ArrowUpRight, ChevronRight
+    TrendingUp, ArrowUpRight,
+    ChevronRight, Activity
 } from 'lucide-react';
 import {
     AreaChart, Area, XAxis, YAxis,
@@ -13,6 +13,7 @@ import KPICard from '../../components/KPICard/KPICard';
 import RiskGauge from '../../components/RiskGauge/RiskGauge';
 import useAuthStore from '../../stores/useAuthStore';
 import { db } from '../../services/firebaseConfig';
+import { collection, query, where, getCountFromServer } from 'firebase/firestore';
 
 const initialChartData = [
     { name: '23:15', value: 400 },
@@ -25,22 +26,29 @@ const initialChartData = [
 
 const Dashboard = () => {
     const [data, setData] = useState(initialChartData);
+
+    const savedProviders = [
+        { id: 1, name: 'Dr. Emily Chen', specialty: 'Orthopedics', cost: '₹2,150', quality: 'High', color: 'bg-health-success/10 text-health-success border-health-success/20' },
+        { id: 2, name: 'Dr. Michael Ross', specialty: 'Cardiology', cost: '₹1,850', quality: 'High', color: 'bg-health-success/10 text-health-success border-health-success/20' },
+        { id: 3, name: 'Summit Medical', specialty: 'Imaging Center', cost: '₹450', quality: 'Avg', color: 'bg-health-warning/10 text-health-warning border-health-warning/20' },
+    ];
+
     const { user } = useAuthStore();
     const [estimateCount, setEstimateCount] = useState(0);
 
-    const displayName = user?.displayName || 'Guest';
-    const firstName = displayName.split(' ')[0];
-
     useEffect(() => {
-        if (!user) return;
-
         const fetchEstimateCount = async () => {
-            try {
-                const q = query(collection(db, 'estimates'), where('userId', '==', user.uid));
-                const snapshot = await getCountFromServer(q);
-                setEstimateCount(snapshot.data().count);
-            } catch (err) {
-                console.error("Error fetching estimate count:", err);
+            if (user?.uid) {
+                try {
+                    const q = query(
+                        collection(db, 'estimates'),
+                        where('userId', '==', user.uid)
+                    );
+                    const snapshot = await getCountFromServer(q);
+                    setEstimateCount(snapshot.data().count);
+                } catch (error) {
+                    console.error("Error fetching estimate count:", error);
+                }
             }
         };
 
@@ -53,46 +61,47 @@ const Dashboard = () => {
                 const now = new Date();
                 const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-                return [...prevData.slice(1), {
+                const nextData = [...prevData.slice(1), {
                     name: timeStr,
                     value: Math.round(newVal)
                 }];
+                return nextData;
             });
         }, 3000);
 
         return () => clearInterval(interval);
-    }, [user]);
+    }, [user?.uid]);
 
-    const savedProviders = [];
+    const firstName = user?.displayName ? user.displayName.split(' ')[0] : 'Sarah';
 
     return (
         <div className="max-w-7xl mx-auto px-4 py-10 space-y-10">
             {/* Header section */}
             <div className="flex flex-col md:flex-row md:items-center justify-between space-y-4 md:space-y-0">
-                <div className="flex items-center space-x-4">
-                    {user?.photoURL && (
-                        <img src={user.photoURL} alt="Profile" className="w-16 h-16 rounded-full border-2 border-primary-teal" />
-                    )}
-                    <div>
-                        <h1 className="text-4xl font-bold text-primary-navy tracking-tight mb-2">
-                            Welcome back, {firstName}
-                        </h1>
-                        <p className="text-health-text-secondary text-lg">Here is your healthcare cost and risk overview for this month.</p>
-                    </div>
+                <div>
+                    <h1 className="text-4xl font-bold text-primary-navy tracking-tight mb-2">Welcome back, {firstName}</h1>
+                    <p className="text-health-text-secondary text-lg">Here is your healthcare cost and risk overview for this month.</p>
                 </div>
             </div>
 
             {/* KPI Cards Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 <KPICard
                     title="Total Estimates"
                     value={estimateCount}
-                    trend="↑ 2%"
+                    trend="Real-time"
                     icon={<Grid size={24} />}
                     iconBgColor="bg-blue-500/10"
                     iconColor="text-blue-500"
                 />
-
+                <KPICard
+                    title="Providers Saved"
+                    value={8}
+                    trend="+3 new"
+                    icon={<Bookmark size={24} />}
+                    iconBgColor="bg-purple-500/10"
+                    iconColor="text-purple-500"
+                />
                 <KPICard
                     title="Risk Level"
                     value="Medium"
@@ -113,6 +122,7 @@ const Dashboard = () => {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                {/* Savings Chart Area */}
                 <motion.div
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
@@ -172,6 +182,7 @@ const Dashboard = () => {
                     </div>
                 </motion.div>
 
+                {/* Risk Analysis Card */}
                 <motion.div
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
@@ -214,7 +225,63 @@ const Dashboard = () => {
                 </motion.div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 gap-8">
+                {/* Saved Providers Table */}
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="card-premium backdrop-blur-md bg-white/70 border border-white/20 shadow-xl shadow-primary-teal/5 overflow-hidden shadow-xl"
+                >
+                    <div className="p-6 border-b border-health-border flex justify-between items-center">
+                        <h4 className="text-lg font-bold text-primary-navy">Saved Providers</h4>
+                        <a href="/providers" className="text-sm font-bold text-primary-teal hover:underline flex items-center">
+                            View all <ChevronRight size={16} />
+                        </a>
+                    </div>
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-left">
+                            <thead>
+                                <tr className="bg-health-bg/50">
+                                    <th className="px-6 py-4 text-[10px] font-bold text-health-text-muted uppercase tracking-widest">Provider</th>
+                                    <th className="px-6 py-4 text-[10px] font-bold text-health-text-muted uppercase tracking-widest">Specialty</th>
+                                    <th className="px-6 py-4 text-[10px] font-bold text-health-text-muted uppercase tracking-widest text-right">Est. Cost</th>
+                                    <th className="px-6 py-4 text-[10px] font-bold text-health-text-muted uppercase tracking-widest text-center">Quality</th>
+                                    <th className="px-6 py-4"></th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-health-border">
+                                {savedProviders.map((p) => (
+                                    <tr key={p.id} className="hover:bg-health-bg/20 transition-colors group">
+                                        <td className="px-6 py-4">
+                                            <div className="flex items-center space-x-3">
+                                                <div className="w-8 h-8 rounded-full overflow-hidden bg-primary-teal/10">
+                                                    <img src={`https://i.pravatar.cc/100?u=${p.name}`} alt={p.name} />
+                                                </div>
+                                                <span className="text-sm font-bold text-primary-navy">{p.name}</span>
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <span className="text-sm text-health-text-secondary">{p.specialty}</span>
+                                        </td>
+                                        <td className="px-6 py-4 text-right">
+                                            <span className="text-sm font-bold text-primary-navy tabular-nums">{p.cost}</span>
+                                        </td>
+                                        <td className="px-6 py-4 text-center">
+                                            <span className={`text-[10px] font-bold px-2 py-1 rounded-md border-2 ${p.color}`}>
+                                                {p.quality}
+                                            </span>
+                                        </td>
+                                        <td className="px-6 py-4 text-right">
+                                            <button className="text-health-text-muted group-hover:text-primary-teal transition-colors">
+                                                <ArrowUpRight size={18} />
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </motion.div>
 
             </div>
         </div>

@@ -9,8 +9,10 @@ const Landing = lazy(() => import('./pages/Landing'));
 const Login = lazy(() => import('./pages/Login/Login'));
 const Signup = lazy(() => import('./pages/Signup/Signup'));
 const Dashboard = lazy(() => import('./pages/Dashboard/Dashboard'));
+const Providers = lazy(() => import('./pages/Providers/Providers'));
 const Settings = lazy(() => import('./pages/Settings/Settings'));
 const CostEstimator = lazy(() => import('./pages/CostEstimator/CostEstimator'));
+const ProviderDetail = lazy(() => import('./pages/Providers/ProviderDetail'));
 const About = lazy(() => import('./pages/About'));
 
 // Loading component
@@ -41,6 +43,8 @@ function App() {
             <Route path="/" element={<Landing />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
+            <Route path="/providers" element={<Providers />} />
+            <Route path="/providers/:id" element={<ProviderDetail />} />
             <Route path="/about" element={<About />} />
 
             {/* Protected Routes */}

@@ -86,9 +86,18 @@ const Landing = () => {
                                 <Zap size={18} />
                                 <span>Check My Risk Free</span>
                             </Link>
+                            <Link to="/providers" className="btn-outline bg-white flex items-center space-x-2 py-4 px-8 text-base w-full sm:w-auto justify-center">
+                                <Activity size={18} />
+                                <span>Browse Providers</span>
+                            </Link>
                         </div>
 
                         <div className="mt-16 pt-8 border-t border-health-border/50 flex space-x-12">
+                            <div>
+                                <div className="text-2xl font-bold text-primary-navy">10k+</div>
+                                <div className="text-xs text-health-text-muted mt-1">Providers Listed</div>
+                            </div>
+                            <div className="h-10 w-px bg-health-border self-center"></div>
                             <div>
                                 <div className="text-2xl font-bold text-primary-navy">₹2.4Cr</div>
                                 <div className="text-xs text-health-text-muted mt-1">Savings Generated</div>
