@@ -26,6 +26,7 @@ const Navbar = () => {
             { name: 'Dashboard', path: '/dashboard', icon: <LayoutDashboard size={18} /> },
             { name: 'Cost Risk Estimator', path: '/cost-estimator/step-1', icon: <SearchIcon size={18} /> },
             { name: 'Find Providers', path: '/providers', icon: <Users size={18} /> },
+            { name: 'AI Chat', path: '/ai-chat', icon: <ShieldCheck size={18} /> },
         ]
         : [
             { name: 'How It Works', path: '/#how-it-works' },

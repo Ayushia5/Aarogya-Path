@@ -4,15 +4,6 @@ import { motion, useSpring, useTransform } from 'framer-motion';
 const RiskGauge = ({ value = 0, label = "SAFE Zone", color = "#4CAF7D" }) => {
     // value should be between 0 (low risk/green) and 100 (high risk/red)
     // Angle: -90 degrees (left) to 90 degrees (right)
-    const springValue = useSpring(0, { stiffness: 40, damping: 15 });
-    const rotate = useTransform(springValue, [0, 100], [-90, 90]);
-
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            springValue.set(value);
-        }, 500);
-        return () => clearTimeout(timer);
-    }, [value, springValue]);
 
     return (
         <div className="relative flex flex-col items-center">
@@ -47,7 +38,12 @@ const RiskGauge = ({ value = 0, label = "SAFE Zone", color = "#4CAF7D" }) => {
                 <circle cx="120" cy="120" r="5" fill="#1A2333" />
 
                 {/* Needle */}
-                <motion.g style={{ rotate, originX: '120px', originY: '120px' }}>
+                <motion.g
+                    initial={false}
+                    animate={{ rotate: (value / 100) * 180 - 90 }}
+                    transition={{ type: 'spring', stiffness: 40, damping: 15 }}
+                    style={{ originX: 0.5, originY: 0.857 }}
+                >
                     <line
                         x1="120"
                         y1="120"

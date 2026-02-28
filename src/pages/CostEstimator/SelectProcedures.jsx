@@ -9,7 +9,9 @@ import { useNavigate, Link } from 'react-router-dom';
 import ProcedureChip from '../../components/ProcedureChip/ProcedureChip';
 import useEstimatorStore from '../../stores/useEstimatorStore';
 
-const Users = ({ size, className }) => (
+import { medicalProcedures } from '../../data/medicalProcedures';
+
+const UsersIcon = ({ size, className }) => (
     <svg
         width={size}
         height={size}
@@ -28,28 +30,39 @@ const Users = ({ size, className }) => (
     </svg>
 );
 
-const categories = [
-    { id: 'cardiology', name: 'Cardiology', icon: <Heart size={18} />, count: 12 },
-    { id: 'orthopedics', name: 'Orthopedics', icon: <Activity size={18} />, count: 8 },
-    { id: 'dermatology', name: 'Dermatology', icon: <Stethoscope size={18} />, count: 15 },
-    { id: 'general', name: 'General Practice', icon: <Stethoscope size={18} />, count: 20 },
-    { id: 'pediatrics', name: 'Pediatrics', icon: <Users size={18} /> }, // Assuming Users icon or similar
-    { id: 'radiology', name: 'Radiology', icon: <ChevronRight size={18} /> },
-    { id: 'neurology', name: 'Neurology', icon: <Brain size={18} /> },
-];
-
-const cardiologyProcedures = {
-    common: ['ECG', 'Echocardiogram', 'Stress Test', 'Cardiac Catheterization'],
-    imaging: ['Cardiac MRI', 'CT Angiography'],
-    surgical: ['Angioplasty', 'Pacemaker Implantation', 'Valve Replacement', 'Coronary Artery Bypass'],
+const getCategoryIcon = (id) => {
+    switch (id) {
+        case 'cardiology': return <Heart size={18} />;
+        case 'orthopedic': return <Activity size={18} />;
+        case 'diagnostic-imaging': return <ChevronRight size={18} />;
+        case 'ophthalmology': return <Eye size={18} />;
+        case 'maternity': return <UsersIcon size={18} />;
+        case 'general-surgery': return <Stethoscope size={18} />;
+        case 'specialized': return <Activity size={18} />;
+        default: return <Stethoscope size={18} />;
+    }
 };
 
 const SelectProcedures = () => {
     const navigate = useNavigate();
     const { selectedProcedures, toggleProcedure } = useEstimatorStore();
-    const [selectedCategory, setSelectedCategory] = useState('cardiology');
+    const [selectedCategoryId, setSelectedCategoryId] = useState('cardiology');
     const [searchQuery, setSearchQuery] = useState('');
 
+    const categories = medicalProcedures.map(cat => ({
+        id: cat.id,
+        name: cat.category,
+        icon: getCategoryIcon(cat.id),
+        count: cat.procedures.length
+    }));
+
+    const activeCategory = medicalProcedures.find(c => c.id === selectedCategoryId) || medicalProcedures[0];
+
+    const allProceduresFlat = medicalProcedures.flatMap(cat => cat.procedures);
+
+    const filteredProcedures = searchQuery
+        ? allProceduresFlat.filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase()))
+        : activeCategory.procedures;
 
     return (
         <div className="max-w-7xl mx-auto px-4 py-8 pb-32">
@@ -79,35 +92,28 @@ const SelectProcedures = () => {
                 <aside className="lg:w-1/4">
                     <div className="card-premium p-6">
                         <h4 className="text-[10px] font-bold text-health-text-muted uppercase tracking-widest mb-4">Categories</h4>
-                        <div className="relative mb-6">
-                            <span className="absolute inset-y-0 left-0 pl-3 flex items-center">
-                                <Search className="text-health-text-muted" size={14} />
-                            </span>
-                            <input
-                                type="text"
-                                placeholder="Filter categories"
-                                className="w-full pl-9 pr-3 py-2 bg-health-bg border border-health-border rounded-lg text-sm focus:outline-none focus:border-primary-teal"
-                            />
-                        </div>
 
                         <div className="space-y-1">
                             {categories.map((cat) => (
                                 <button
                                     key={cat.id}
-                                    onClick={() => setSelectedCategory(cat.id)}
-                                    className={`w-full flex items-center justify-between p-3 rounded-xl transition-all ${selectedCategory === cat.id
+                                    onClick={() => {
+                                        setSelectedCategoryId(cat.id);
+                                        setSearchQuery('');
+                                    }}
+                                    className={`w-full flex items-center justify-between p-3 rounded-xl transition-all ${selectedCategoryId === cat.id && !searchQuery
                                         ? 'bg-primary-teal/5 text-primary-teal border-l-4 border-primary-teal font-bold'
                                         : 'text-health-text-secondary hover:bg-health-bg'
                                         }`}
                                 >
                                     <div className="flex items-center space-x-3">
-                                        <span className={selectedCategory === cat.id ? 'text-primary-teal' : 'text-health-text-muted'}>
+                                        <span className={selectedCategoryId === cat.id && !searchQuery ? 'text-primary-teal' : 'text-health-text-muted'}>
                                             {cat.icon}
                                         </span>
                                         <span className="text-sm">{cat.name}</span>
                                     </div>
-                                    {cat.count && (
-                                        <span className={`text-[10px] px-1.5 py-0.5 rounded-md ${selectedCategory === cat.id ? 'bg-primary-teal/20' : 'bg-health-border'
+                                    {cat.count > 0 && (
+                                        <span className={`text-[10px] px-1.5 py-0.5 rounded-md ${selectedCategoryId === cat.id && !searchQuery ? 'bg-primary-teal/20' : 'bg-health-border'
                                             }`}>
                                             {cat.count}
                                         </span>
@@ -127,7 +133,7 @@ const SelectProcedures = () => {
                             </span>
                             <input
                                 type="text"
-                                placeholder="Search specific cardiology procedures (e.g. ECG, Angioplasty)"
+                                placeholder="Search procedures (e.g. MRI, Surgery, Heart)"
                                 className="w-full pl-12 pr-4 py-4 bg-health-bg border border-health-border rounded-2xl text-lg focus:outline-none focus:border-primary-teal focus:bg-[#F0FCFC] transition-all"
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -135,23 +141,24 @@ const SelectProcedures = () => {
                         </div>
 
                         <div className="space-y-10">
-                            {Object.entries(cardiologyProcedures).map(([group, list]) => (
-                                <div key={group}>
-                                    <h4 className="text-xs font-bold text-health-text-muted uppercase tracking-widest mb-4">
-                                        {group.charAt(0).toUpperCase() + group.slice(1)} Procedures
-                                    </h4>
-                                    <div className="flex flex-wrap gap-4">
-                                        {list.map(proc => (
-                                            <ProcedureChip
-                                                key={proc}
-                                                name={proc}
-                                                isSelected={selectedProcedures.includes(proc)}
-                                                onClick={() => toggleProcedure(proc)}
-                                            />
-                                        ))}
-                                    </div>
+                            <div>
+                                <h4 className="text-xs font-bold text-health-text-muted uppercase tracking-widest mb-4">
+                                    {searchQuery ? `Search Results for "${searchQuery}"` : `${activeCategory.category} Procedures`}
+                                </h4>
+                                <div className="flex flex-wrap gap-4">
+                                    {filteredProcedures.map(proc => (
+                                        <ProcedureChip
+                                            key={proc.name}
+                                            name={proc.name}
+                                            isSelected={selectedProcedures.includes(proc.name)}
+                                            onClick={() => toggleProcedure(proc.name)}
+                                        />
+                                    ))}
+                                    {filteredProcedures.length === 0 && (
+                                        <p className="text-sm text-health-text-secondary italic">No procedures found matching your search.</p>
+                                    )}
                                 </div>
-                            ))}
+                            </div>
                         </div>
                     </div>
 

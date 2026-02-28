@@ -11,16 +11,65 @@ import RiskGauge from '../../components/RiskGauge/RiskGauge';
 import CostComparisonCard from '../../components/CostComparisonCard/CostComparisonCard';
 import AlertBanner from '../../components/AlertBanner/AlertBanner';
 
-const Results = () => {
-    const { selectedProcedures } = useEstimatorStore();
+import { medicalProcedures } from '../../data/medicalProcedures';
 
-    // Map procedure names to cost ranges for display
-    const procedureData = selectedProcedures.map(name => ({
-        name,
-        cost: name === 'ECG' ? '₹4,500 - ₹12,000' :
-            name === 'Cardiac Catheterization' ? '₹28,000 - ₹45,000' :
-                name === 'Angioplasty' ? '₹9,500 - ₹11,000' : '₹5,000 - ₹15,000'
+const Results = () => {
+    const { selectedProcedures, patientData } = useEstimatorStore();
+    const navigate = useNavigate();
+
+    const allProceduresFlat = medicalProcedures.flatMap(cat => cat.procedures);
+
+    // Map procedure names to actual data
+    const procedureDetails = selectedProcedures.map(name => {
+        const data = allProceduresFlat.find(p => p.name === name);
+        return data || { name, minCost: 5000, maxCost: 15000 };
+    });
+
+    const formatINR = (val) => {
+        return new Intl.NumberFormat('en-IN', {
+            style: 'currency',
+            currency: 'INR',
+            maximumFractionDigits: 0,
+        }).format(val);
+    };
+
+    const procedureData = procedureDetails.map(proc => ({
+        name: proc.name,
+        cost: `${formatINR(proc.minCost)} - ${formatINR(proc.maxCost)}`
     }));
+
+    // Dynamic Risk Logic
+    const totalMinCost = procedureDetails.reduce((sum, p) => sum + p.minCost, 0);
+    const totalMaxCost = procedureDetails.reduce((sum, p) => sum + p.maxCost, 0);
+    const avgTotalCost = (totalMinCost + totalMaxCost) / 2;
+
+    const monthlyIncome = (patientData.income || 75000) / 12;
+
+    // Risk Score: How many months of income does this cost? 
+    // Let's say 0.5 month = low, 1 month = medium, 2+ months = high
+    // Score = (avgTotalCost / monthlyIncome) * 20 (so 5 months = score 100)
+    const riskScoreRaw = (avgTotalCost / (monthlyIncome || 1)) * 20;
+    const riskScore = Math.min(Math.round(riskScoreRaw), 100);
+
+    let riskStatus = "SAFE ZONE";
+    let riskColor = "#4CAF7D";
+    let alertType = "success";
+    let alertTitle = "Low Financial Risk";
+    let alertMsg = "Your estimated healthcare costs are well within your financial capacity. Standard insurance coverage should be sufficient.";
+
+    if (riskScore >= 40) {
+        riskStatus = "HIGH RISK";
+        riskColor = "#E05252";
+        alertType = "danger";
+        alertTitle = "High Financial Risk Warning";
+        alertMsg = "Estimated costs represent a significant portion of your annual income. We strongly recommend exploring financial assistance or verified payment plans.";
+    } else if (riskScore >= 15) {
+        riskStatus = "MEDIUM RISK";
+        riskColor = "#F5A623";
+        alertType = "warning";
+        alertTitle = "Medium Financial Risk Warning";
+        alertMsg = "Your out-of-pocket costs may exceed your monthly savings capacity. Consider checking our verified payment plans to reduce immediate risk.";
+    }
 
     return (
         <div className="max-w-7xl mx-auto px-4 py-8 pb-20">
@@ -48,43 +97,43 @@ const Results = () => {
                     className="lg:col-span-1 card-premium p-8 flex flex-col items-center justify-center text-center"
                 >
                     <h4 className="text-xs font-bold text-health-text-muted uppercase tracking-widest mb-8">Financial Risk Analysis</h4>
-                    <RiskGauge value={45} label="MEDIUM RISK" color="#F5A623" />
+                    <RiskGauge value={riskScore} label={riskStatus} color={riskColor} />
                     <div className="mt-8 space-y-4 w-full">
                         <div className="flex justify-between text-sm py-2 border-b border-health-border">
                             <span className="text-health-text-secondary">Risk Score</span>
-                            <span className="font-bold text-primary-navy">45 / 100</span>
+                            <span className="font-bold text-primary-navy">{riskScore} / 100</span>
                         </div>
                         <div className="flex justify-between text-sm py-2 border-b border-health-border">
-                            <span className="text-health-text-secondary">Regional Avg.</span>
-                            <span className="font-bold text-primary-navy">₹52,000</span>
+                            <span className="text-health-text-secondary">Est. Minimum</span>
+                            <span className="font-bold text-primary-navy">{formatINR(totalMinCost)}</span>
                         </div>
                         <div className="flex justify-between text-sm py-2">
-                            <span className="text-health-text-secondary">Potential Savings</span>
-                            <span className="font-bold text-primary-teal">₹12,500</span>
+                            <span className="text-health-text-secondary">Est. Maximum</span>
+                            <span className="font-bold text-primary-navy">{formatINR(totalMaxCost)}</span>
                         </div>
                     </div>
                     <p className="mt-8 text-xs text-health-text-muted">
-                        Your risk score is calculated based on provider availability, procedure complexity, and insurance coverage.
+                        Your risk score is calculated based on total estimated cost relative to your reported annual income.
                     </p>
                 </motion.div>
 
                 {/* Cost Comparison Section */}
                 <div className="lg:col-span-2 space-y-8">
                     <AlertBanner
-                        type="warning"
-                        title="Medium Financial Risk Warning"
-                        message="Your out-of-pocket costs may exceed your annual deductible. Consider checking our verified payment plans to reduce immediate risk."
+                        type={alertType}
+                        title={alertTitle}
+                        message={alertMsg}
                     />
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <CostComparisonCard
                             type="public"
-                            priceRange="₹42,000 - ₹68,000"
+                            priceRange={`${formatINR(totalMinCost * 0.15)} - ${formatINR(totalMinCost * 0.4)}`}
                             isBestValue={true}
                         />
                         <CostComparisonCard
                             type="private"
-                            priceRange="₹1,25,000 - ₹1,80,000"
+                            priceRange={`${formatINR(totalMinCost)} - ${formatINR(totalMaxCost)}`}
                             isBestValue={false}
                         />
                     </div>
@@ -131,7 +180,7 @@ const Results = () => {
                         </div>
                         <div className="p-4 bg-health-bg/30 text-center">
                             <p className="text-[10px] text-health-text-muted uppercase tracking-tighter">
-                                * Prices are estimates based on regional averages and do not include hospital facility fees.
+                                * Prices are estimates based on regional averages and provided data. Public system costs are projected co-pays.
                             </p>
                         </div>
                     </motion.div>

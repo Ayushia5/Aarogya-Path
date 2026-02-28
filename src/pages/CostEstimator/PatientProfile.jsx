@@ -132,8 +132,8 @@ const PatientProfile = () => {
                                     <input
                                         type="range"
                                         min="0"
-                                        max="250000"
-                                        step="5000"
+                                        max="2500000"
+                                        step="10000"
                                         value={income}
                                         onChange={(e) => setPatientData({ income: Number(e.target.value) })}
                                         className="w-full h-2 bg-health-border rounded-full appearance-none cursor-pointer accent-primary-teal"

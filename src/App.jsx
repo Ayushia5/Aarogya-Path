@@ -14,6 +14,7 @@ const Settings = lazy(() => import('./pages/Settings/Settings'));
 const CostEstimator = lazy(() => import('./pages/CostEstimator/CostEstimator'));
 const ProviderDetail = lazy(() => import('./pages/Providers/ProviderDetail'));
 const About = lazy(() => import('./pages/About'));
+const AIChat = lazy(() => import('./pages/AIChat/AIChat'));
 
 // Loading component
 const PageSkeleton = () => (
@@ -69,6 +70,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <Settings />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/ai-chat"
+              element={
+                <ProtectedRoute>
+                  <AIChat />
                 </ProtectedRoute>
               }
             />
