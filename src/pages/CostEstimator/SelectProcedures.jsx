@@ -9,6 +9,25 @@ import { useNavigate, Link } from 'react-router-dom';
 import ProcedureChip from '../../components/ProcedureChip/ProcedureChip';
 import useEstimatorStore from '../../stores/useEstimatorStore';
 
+const Users = ({ size, className }) => (
+    <svg
+        width={size}
+        height={size}
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className={className}
+    >
+        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+        <circle cx="9" cy="7" r="4" />
+        <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+        <path d="M23 7a4 4 0 0 0-3-3.87" />
+    </svg>
+);
+
 const categories = [
     { id: 'cardiology', name: 'Cardiology', icon: <Heart size={18} />, count: 12 },
     { id: 'orthopedics', name: 'Orthopedics', icon: <Activity size={18} />, count: 8 },
@@ -211,24 +230,6 @@ const SelectProcedures = () => {
     );
 };
 
-// Simple Users icon for pediatrics category
-const Users = ({ size, className }) => (
-    <svg
-        width={size}
-        height={size}
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        className={className}
-    >
-        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-        <circle cx="9" cy="7" r="4" />
-        <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
-        <path d="M23 7a4 4 0 0 0-3-3.87" />
-    </svg>
-);
+
 
 export default SelectProcedures;

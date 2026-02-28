@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { User, DollarSign, Info, ChevronRight } from 'lucide-react';
 import StepProgress from '../../components/StepProgress/StepProgress';
 import { useNavigate } from 'react-router-dom';
 import useEstimatorStore from '../../stores/useEstimatorStore';
+import { db, auth } from '../../services/firebaseConfig';
+import { doc, getDoc } from 'firebase/firestore';
 
 const PatientProfile = () => {
     const navigate = useNavigate();
@@ -17,6 +19,36 @@ const PatientProfile = () => {
             maximumFractionDigits: 0,
         }).format(val);
     };
+
+    const [profile, setProfile] = useState({
+        firstName: '',
+        lastName: '',
+        zipCode: ''
+    });
+
+    useEffect(() => {
+        const fetchUserData = async () => {
+            if (auth.currentUser) {
+                const userRef = doc(db, 'users', auth.currentUser.uid);
+                const docSnap = await getDoc(userRef);
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    setProfile({
+                        firstName: data.firstName || auth.currentUser.displayName?.split(' ')[0] || '',
+                        lastName: data.lastName || auth.currentUser.displayName?.split(' ')[1] || '',
+                        zipCode: data.address?.match(/\b\d{5}\b/)?.[0] || ''
+                    });
+                } else if (auth.currentUser.displayName) {
+                    setProfile(prev => ({
+                        ...prev,
+                        firstName: auth.currentUser.displayName.split(' ')[0] || '',
+                        lastName: auth.currentUser.displayName.split(' ')[1] || '',
+                    }));
+                }
+            }
+        };
+        fetchUserData();
+    }, []);
 
     return (
         <div className="max-w-4xl mx-auto px-4 py-8">
@@ -61,15 +93,14 @@ const PatientProfile = () => {
                                 <h4 className="text-lg font-bold text-primary-navy">Personal Information</h4>
                                 <div className="flex-grow border-t border-health-border ml-4"></div>
                             </div>
-
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
                                     <label className="block text-sm font-semibold text-health-text-secondary mb-2">First Name</label>
-                                    <input type="text" defaultValue="Jane" className="input-standard" />
+                                    <input type="text" value={profile.firstName} onChange={e => setProfile({ ...profile, firstName: e.target.value })} className="input-standard" />
                                 </div>
                                 <div>
                                     <label className="block text-sm font-semibold text-health-text-secondary mb-2">Last Name</label>
-                                    <input type="text" defaultValue="Doe" className="input-standard" />
+                                    <input type="text" value={profile.lastName} onChange={e => setProfile({ ...profile, lastName: e.target.value })} className="input-standard" />
                                 </div>
                                 <div>
                                     <label className="block text-sm font-semibold text-health-text-secondary mb-2">Date of Birth</label>
@@ -77,7 +108,7 @@ const PatientProfile = () => {
                                 </div>
                                 <div>
                                     <label className="block text-sm font-semibold text-health-text-secondary mb-2">Zip Code</label>
-                                    <input type="text" defaultValue="94102" className="input-standard" />
+                                    <input type="text" value={profile.zipCode} onChange={e => setProfile({ ...profile, zipCode: e.target.value })} className="input-standard" />
                                 </div>
                             </div>
                         </section>
@@ -150,7 +181,7 @@ const PatientProfile = () => {
                             </button>
                             <button
                                 type="button"
-                                onClick={() => navigate('/cost-estimator/results')}
+                                onClick={() => navigate('/cost-estimator/step-2')}
                                 className="btn-primary flex items-center space-x-2"
                             >
                                 <span>Generate Accuracy Estimate</span>

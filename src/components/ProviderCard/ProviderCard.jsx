@@ -1,12 +1,15 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { Star, MapPin, ExternalLink, Calendar } from 'lucide-react';
 
 const ProviderCard = ({ provider, index }) => {
     const {
         name, specialty, yearsExp, rating, reviewCount,
-        hospital, city, badge, imageUrl
+        hospital, city, badge, imageUrl, id
     } = provider;
+
+    const navigate = useNavigate();
 
     const badgeStyles = {
         "Excellent": "bg-health-success/10 text-health-success border-health-success/20",
@@ -65,12 +68,11 @@ const ProviderCard = ({ provider, index }) => {
                 </div>
 
                 {/* Buttons */}
-                <div className="grid grid-cols-2 gap-3">
-                    <button className="flex items-center justify-center py-2 rounded-xl border-2 border-health-border text-xs font-bold text-health-text-secondary hover:bg-health-bg hover:border-health-text-muted transition-all">
+                <div className="grid grid-cols-1 gap-3">
+                    <button
+                        onClick={() => navigate(`/providers/${id}`)}
+                        className="flex items-center justify-center py-2 rounded-xl border-2 border-health-border text-xs font-bold text-health-text-secondary hover:bg-health-bg hover:border-health-text-muted transition-all">
                         Details
-                    </button>
-                    <button className="flex items-center justify-center py-2 rounded-xl bg-primary-teal text-white text-xs font-bold shadow-lg shadow-primary-teal/20 transition-all hover:bg-primary-teal/90">
-                        Book Visit
                     </button>
                 </div>
             </div>

@@ -14,7 +14,7 @@ const KPICard = ({ title, value, trend, icon, iconBgColor = 'bg-blue-500/10', ic
     }, [value]);
 
     const formattedValue = isCurrency
-        ? new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(displayValue)
+        ? new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(displayValue)
         : Math.floor(displayValue).toString();
 
     const isTrendPositive = trend?.startsWith('↑') || trend?.startsWith('+');

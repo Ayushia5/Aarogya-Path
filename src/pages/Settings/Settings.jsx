@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
     User, Bell, ShieldCheck, Lock, CreditCard,
@@ -9,6 +9,8 @@ import ToggleSwitch from '../../components/ToggleSwitch/ToggleSwitch';
 
 import useAuthStore from '../../stores/useAuthStore';
 import { useNavigate } from 'react-router-dom';
+import { db } from '../../services/firebaseConfig';
+import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 
 const Settings = () => {
     const { user } = useAuthStore();
@@ -30,23 +32,57 @@ const Settings = () => {
         marketing: false,
     });
 
-    const handleSave = (e) => {
+    // Fetch initial profile data on mount or user change
+    useEffect(() => {
+        if (!user) return;
+        const fetchProfile = async () => {
+            try {
+                const userRef = doc(db, 'users', user.uid);
+                const docSnap = await getDoc(userRef);
+                if (docSnap.exists()) {
+                    setProfile((prev) => ({ ...prev, ...docSnap.data() }));
+                } else {
+                    // Create basic document if empty
+                    const defaultProfile = {
+                        firstName: user.displayName?.split(' ')[0] || '',
+                        lastName: user.displayName?.split(' ')[1] || '',
+                        email: user.email || '',
+                        phone: '',
+                        address: ''
+                    };
+                    await setDoc(userRef, defaultProfile);
+                    setProfile(defaultProfile);
+                }
+            } catch (err) {
+                console.error("Error fetching profile:", err);
+            }
+        };
+        fetchProfile();
+    }, [user]);
+
+    const handleSave = async (e) => {
         e.preventDefault();
+        if (!user) return;
         setIsSaving(true);
-        // Simulate API call
-        setTimeout(() => {
-            setIsSaving(false);
+        try {
+            const userRef = doc(db, 'users', user.uid);
+            await updateDoc(userRef, {
+                firstName: profile.firstName,
+                lastName: profile.lastName,
+                phone: profile.phone,
+                address: profile.address
+            });
             setSaveSuccess(true);
             setTimeout(() => setSaveSuccess(false), 3000);
-        }, 1000);
+        } catch (error) {
+            console.error("Error saving profile:", error);
+        } finally {
+            setIsSaving(false);
+        }
     };
 
     const menuItems = [
-        { id: 'profile', label: 'Profile Settings', icon: <User size={18} />, active: true },
-        { id: 'notifications', label: 'Notifications', icon: <Bell size={18} /> },
-        { id: 'security', label: 'Security & Password', icon: <Lock size={18} /> },
-        { id: 'privacy', label: 'Data Privacy', icon: <ShieldCheck size={18} /> },
-        { id: 'billing', label: 'Billing & Plans', icon: <CreditCard size={18} /> },
+        { id: 'profile', label: 'Profile Settings', icon: <User size={18} />, active: true }
     ];
 
     return (
@@ -65,7 +101,7 @@ const Settings = () => {
                         <div className="relative mb-4">
                             <div className="w-24 h-24 rounded-full border-4 border-health-border overflow-hidden bg-health-bg">
                                 <img
-                                    src="https://i.pravatar.cc/150?u=alex"
+                                    src={user?.photoURL || "https://i.pravatar.cc/150?u=fallback"}
                                     alt="Avatar"
                                     className="w-full h-full object-cover"
                                 />
@@ -74,8 +110,10 @@ const Settings = () => {
                                 <Camera size={14} />
                             </button>
                         </div>
-                        <h3 className="text-lg font-bold text-primary-navy">Alex Morgan</h3>
-                        <p className="text-sm text-health-text-secondary mb-6">alex.morgan@example.com</p>
+                        <h3 className="text-lg font-bold text-primary-navy">
+                            {user?.displayName || (profile.firstName ? `${profile.firstName} ${profile.lastName}` : 'Guest')}
+                        </h3>
+                        <p className="text-sm text-health-text-secondary mb-6">{user?.email || profile.email}</p>
 
                         <nav className="w-full space-y-1">
                             {menuItems.map((item) => (
@@ -214,35 +252,6 @@ const Settings = () => {
                         </form>
                     </motion.div>
 
-                    {/* Notification Preferences Card */}
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.2 }}
-                        className="card-premium p-8"
-                    >
-                        <h4 className="text-lg font-bold text-primary-navy mb-6">Notification Preferences</h4>
-                        <div className="divide-y divide-health-border">
-                            <ToggleSwitch
-                                label="Cost Estimates"
-                                description="Receive updates when your cost estimates are ready"
-                                isOn={notifications.estimates}
-                                onToggle={() => setNotifications({ ...notifications, estimates: !notifications.estimates })}
-                            />
-                            <ToggleSwitch
-                                label="Appointment Reminders"
-                                description="Get notified 24 hours before your appointments"
-                                isOn={notifications.appointments}
-                                onToggle={() => setNotifications({ ...notifications, appointments: !notifications.appointments })}
-                            />
-                            <ToggleSwitch
-                                label="Marketing & Newsletter"
-                                description="News about features and healthcare tips"
-                                isOn={notifications.marketing}
-                                onToggle={() => setNotifications({ ...notifications, marketing: !notifications.marketing })}
-                            />
-                        </div>
-                    </motion.div>
 
                     {/* Footer actions */}
                     <div className="flex justify-between items-center pt-8">

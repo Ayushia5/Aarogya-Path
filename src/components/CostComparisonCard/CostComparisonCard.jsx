@@ -9,8 +9,8 @@ const CostComparisonCard = ({ type, priceRange, isBestValue }) => {
         <motion.div
             whileHover={{ y: -5 }}
             className={`relative p-6 rounded-2xl border-2 flex flex-col transition-all overflow-hidden ${isBestValue
-                    ? 'border-primary-teal bg-white shadow-xl'
-                    : 'border-health-border bg-health-bg/30'
+                ? 'border-primary-teal bg-white shadow-xl'
+                : 'border-health-border bg-health-bg/30'
                 }`}
         >
             {isBestValue && (
@@ -49,14 +49,6 @@ const CostComparisonCard = ({ type, priceRange, isBestValue }) => {
                 </div>
             </div>
 
-            <div className={`mt-6 pt-4 border-t ${isBestValue ? 'border-primary-teal/20' : 'border-health-border'}`}>
-                <button className={`w-full py-2.5 rounded-xl font-bold transition-all ${isBestValue
-                        ? 'bg-primary-teal text-white shadow-lg shadow-primary-teal/20'
-                        : 'bg-white border border-health-border text-health-text-secondary hover:border-primary-teal hover:text-primary-teal'
-                    }`}>
-                    Select This Path
-                </button>
-            </div>
         </motion.div>
     );
 };
