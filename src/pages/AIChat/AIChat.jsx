@@ -8,7 +8,8 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import systemPrompt from '../../../ai-instructions.txt?raw';
 
 // Initialize Google Generative AI (requires VITE_GEMINI_API_KEY in .env)
-const apiKey = import.meta.env.VITE_GEMINI_API_KEY || import.meta.env.VITE_GOOGLE_API_KEY;
+const rawKey = import.meta.env.VITE_GEMINI_API_KEY || import.meta.env.VITE_GOOGLE_API_KEY;
+const apiKey = rawKey ? rawKey.trim() : null;
 const genAI = apiKey ? new GoogleGenerativeAI(apiKey) : null;
 
 const AIChat = () => {
