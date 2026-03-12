@@ -4,39 +4,83 @@ import { motion } from 'framer-motion';
 import {
     ChevronLeft, Star, MapPin,
     Clock, ShieldCheck, Mail,
-    Phone, Globe, MessageSquare,
-    Heart, Download, ExternalLink,
+    Phone, MessageSquare,
+    Heart, ExternalLink,
     Award, BookOpen, Stethoscope,
-    Activity, Calendar, ArrowRight
+    Activity, Calendar, ArrowRight, AlertTriangle
 } from 'lucide-react';
 import StarRating from '../../components/StarRating/StarRating';
 import AlertBanner from '../../components/AlertBanner/AlertBanner';
+import { sampleProviders, sampleHospitals, infrastructureGaps } from '../../data/providersData';
+import useAuthStore from '../../stores/useAuthStore';
+import { db } from '../../services/firebaseConfig';
+import { doc, getDoc, updateDoc, arrayUnion, arrayRemove, setDoc } from 'firebase/firestore';
 
 const ProviderDetail = () => {
     const { id } = useParams();
     const navigate = useNavigate();
+    const { user } = useAuthStore();
     const [isSaved, setIsSaved] = useState(false);
+    const [isLoadingSave, setIsLoadingSave] = useState(false);
 
-    // Mock data for the provider
-    const provider = {
-        id,
-        name: 'Dr. Sarah Jenkins',
-        specialty: 'Board Certified Cardiologist',
-        experience: '15+ Years Experience',
-        rating: 4.8,
-        reviews: 124,
-        imageUrl: `https://i.pravatar.cc/400?u=sarah-jenkins`,
-        hospital: 'Apollo Hospitals',
-        city: 'Mumbai',
-        description: 'Dr. Jenkins is a nationally recognized cardiologist specializing in non-invasive imaging and preventive cardiovascular medicine. She has lead multiple clinical trials in heart valve replacement and is passionate about equitable healthcare access.',
-        specialties: ['General Cardiology', 'Echocardiography', 'Heart Valve Disease', 'Preventive Medicine'],
-        education: [
-            { degree: 'Medical Doctorate', institution: 'Stanford University School of Medicine' },
-            { degree: 'Residency', institution: 'Mayo Clinic College of Medicine' },
-        ],
-        acceptingNew: true,
-        telehealth: true,
+    // Fetch the provider from our data source
+    const providerData = sampleProviders.find(p => p.id === id);
+    const hospitalData = sampleHospitals.find(h => h.id === id);
+    const isHospital = !!hospitalData;
+    const provider = providerData || hospitalData || sampleProviders[0];
+
+    // Check if provider is saved on mount
+    React.useEffect(() => {
+        const checkSavedStatus = async () => {
+            if (!user?.uid || !provider) return;
+            try {
+                const userDocRef = doc(db, 'users', user.uid);
+                const docSnap = await getDoc(userDocRef);
+                if (docSnap.exists()) {
+                    const savedIds = docSnap.data().savedProviders || [];
+                    setIsSaved(savedIds.includes(provider.id));
+                }
+            } catch (error) {
+                console.error("Error checking saved status:", error);
+            }
+        };
+        checkSavedStatus();
+    }, [user?.uid, provider]);
+
+    const handleSaveToggle = async () => {
+        if (!user?.uid || !provider) return;
+        setIsLoadingSave(true);
+        try {
+            const userDocRef = doc(db, 'users', user.uid);
+            
+            // First check if user doc exists, create if not
+            const docSnap = await getDoc(userDocRef);
+            if (!docSnap.exists()) {
+                await setDoc(userDocRef, { savedProviders: [] });
+            }
+
+            if (isSaved) {
+                // Remove from saved
+                await updateDoc(userDocRef, {
+                    savedProviders: arrayRemove(provider.id)
+                });
+                setIsSaved(false);
+            } else {
+                // Add to saved
+                await updateDoc(userDocRef, {
+                    savedProviders: arrayUnion(provider.id)
+                });
+                setIsSaved(true);
+            }
+        } catch (error) {
+            console.error("Error toggling saved status:", error);
+        } finally {
+            setIsLoadingSave(false);
+        }
     };
+
+    const infCity = isHospital ? provider.location : provider.city;
+    const infrastructureInfo = infrastructureGaps[infCity] || null;
 
     return (
         <div className="max-w-7xl mx-auto px-4 py-8 pb-32">
@@ -76,24 +120,31 @@ const ProviderDetail = () => {
                                             Telehealth Available
                                         </span>
                                     )}
+                                    {isHospital && provider.badge && (
+                                        <span className="bg-primary-teal/10 text-primary-teal text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest border border-primary-teal/20">
+                                            {provider.badge}
+                                        </span>
+                                    )}
                                 </div>
                             </div>
 
-                            <p className="text-lg font-bold text-primary-teal mb-4">{provider.specialty}</p>
+                            <p className="text-lg font-bold text-primary-teal mb-4">
+                                {isHospital ? "Premium Hospital Facility" : provider.specialty}
+                            </p>
 
                             <div className="flex flex-wrap items-center justify-center md:justify-start gap-6 text-sm">
                                 <div className="flex items-center space-x-2">
                                     <StarRating rating={provider.rating} size={18} />
                                     <span className="font-bold text-primary-navy">{provider.rating}</span>
-                                    <span className="text-health-text-muted">({provider.reviews} reviews)</span>
+                                    <span className="text-health-text-muted">({isHospital ? provider.reviewCount : provider.reviews} reviews)</span>
                                 </div>
                                 <div className="flex items-center space-x-2 text-health-text-secondary">
                                     <MapPin size={18} className="text-health-text-muted" />
-                                    <span>{provider.city}</span>
+                                    <span>{isHospital ? provider.location : provider.city}</span>
                                 </div>
                                 <div className="flex items-center space-x-2 text-health-text-secondary">
                                     <Activity size={18} className="text-health-text-muted" />
-                                    <span>{provider.experience}</span>
+                                    <span>{isHospital ? '24/7 Care' : provider.experience}</span>
                                 </div>
                             </div>
                         </div>
@@ -109,34 +160,65 @@ const ProviderDetail = () => {
                             {provider.description}
                         </p>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                            <div>
-                                <h5 className="text-[10px] font-bold text-health-text-muted uppercase tracking-widest mb-4">Core Specialties</h5>
-                                <div className="flex flex-wrap gap-2">
-                                    {provider.specialties.map((s, idx) => (
-                                        <span key={idx} className="px-3 py-1.5 bg-health-bg border border-health-border rounded-lg text-xs font-semibold text-primary-navy">
-                                            {s}
-                                        </span>
-                                    ))}
+                        {!isHospital ? (
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                <div>
+                                    <h5 className="text-[10px] font-bold text-health-text-muted uppercase tracking-widest mb-4">Core Specialties</h5>
+                                    <div className="flex flex-wrap gap-2">
+                                        {provider.specialties?.map((s, idx) => (
+                                            <span key={idx} className="px-3 py-1.5 bg-health-bg border border-health-border rounded-lg text-xs font-semibold text-primary-navy">
+                                                {s}
+                                            </span>
+                                        ))}
+                                    </div>
+                                </div>
+                                <div>
+                                    <h5 className="text-[10px] font-bold text-health-text-muted uppercase tracking-widest mb-4">Education & Training</h5>
+                                    <ul className="space-y-3">
+                                        {provider.education?.map((e, idx) => (
+                                            <li key={idx} className="flex items-start space-x-3">
+                                                <div className="mt-1 p-1 bg-primary-teal/5 rounded-md text-primary-teal font-bold">
+                                                    <Award size={14} />
+                                                </div>
+                                                <div className="text-xs">
+                                                    <p className="font-bold text-primary-navy">{e.degree}</p>
+                                                    <p className="text-health-text-muted">{e.institution}</p>
+                                                </div>
+                                            </li>
+                                        ))}
+                                    </ul>
                                 </div>
                             </div>
-                            <div>
-                                <h5 className="text-[10px] font-bold text-health-text-muted uppercase tracking-widest mb-4">Education & Training</h5>
-                                <ul className="space-y-3">
-                                    {provider.education.map((e, idx) => (
-                                        <li key={idx} className="flex items-start space-x-3">
-                                            <div className="mt-1 p-1 bg-primary-teal/5 rounded-md text-primary-teal font-bold">
-                                                <Award size={14} />
-                                            </div>
-                                            <div className="text-xs">
-                                                <p className="font-bold text-primary-navy">{e.degree}</p>
-                                                <p className="text-health-text-muted">{e.institution}</p>
-                                            </div>
-                                        </li>
-                                    ))}
-                                </ul>
+                        ) : (
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                <div>
+                                    <h5 className="text-[10px] font-bold text-health-text-muted uppercase tracking-widest mb-4">Core Strengths</h5>
+                                    <div className="flex flex-wrap gap-2">
+                                        <span className="px-3 py-1.5 bg-health-bg border border-health-border rounded-lg text-xs font-semibold text-primary-navy">
+                                            Cleanliness Score: {provider.cleanlinessScore}/10
+                                        </span>
+                                        <span className="px-3 py-1.5 bg-health-bg border border-health-border rounded-lg text-xs font-semibold text-primary-navy">
+                                            Base Cost: {provider.baseCost}
+                                        </span>
+                                    </div>
+                                </div>
+                                {provider.missingFacilities?.length > 0 && (
+                                    <div>
+                                        <h5 className="text-[10px] font-bold text-health-warning uppercase tracking-widest mb-4 flex items-center gap-1.5">
+                                            <AlertTriangle size={14} /> Infrastructure Gaps
+                                        </h5>
+                                        <ul className="space-y-3">
+                                            {provider.missingFacilities.map((f, idx) => (
+                                                <li key={idx} className="flex items-start space-x-3 text-xs text-health-text-secondary">
+                                                    <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-health-warning shrink-0"></span>
+                                                    <span>{f}</span>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                )}
                             </div>
-                        </div>
+                        )}
                     </section>
 
                     {/* Location / Contact Card */}
@@ -148,21 +230,11 @@ const ProviderDetail = () => {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                             <div className="space-y-6">
                                 <div>
-                                    <h5 className="font-bold text-primary-navy text-sm mb-1">{provider.hospital}</h5>
+                                    <h5 className="font-bold text-primary-navy text-sm mb-1">{isHospital ? provider.name : provider.hospital}</h5>
                                     <p className="text-xs text-health-text-secondary leading-relaxed">
                                         123 Medical Center Way, Suite 400<br />
-                                        Sacramento, CA 95814
+                                        {infCity}, Delhi 110001
                                     </p>
-                                </div>
-                                <div className="flex items-center space-x-4">
-                                    <div className="flex items-center space-x-2 text-xs font-semibold text-primary-teal">
-                                        <Globe size={16} />
-                                        <span>Website</span>
-                                    </div>
-                                    <div className="flex items-center space-x-2 text-xs font-semibold text-primary-teal">
-                                        <Download size={16} />
-                                        <span>V-Card</span>
-                                    </div>
                                 </div>
                             </div>
                             <div className="h-40 bg-zinc-100 rounded-2xl overflow-hidden relative border border-health-border border-dashed flex items-center justify-center text-health-text-muted">
@@ -171,6 +243,36 @@ const ProviderDetail = () => {
                             </div>
                         </div>
                     </section>
+
+                    {/* Regional Infrastructure Gaps (Dynamic) */}
+                    {infrastructureInfo && (
+                        <section className="card-premium p-8 bg-gradient-to-br from-white to-health-bg/50">
+                            <h4 className="flex items-center space-x-2 text-lg font-bold text-primary-navy mb-6">
+                                <Activity size={20} className="text-primary-teal" />
+                                <span>Regional Healthcare Infrastructure: {infCity}</span>
+                            </h4>
+                            <div className="space-y-6">
+                                <div className="p-4 rounded-xl bg-health-success/10 border border-health-success/20">
+                                    <h5 className="text-[10px] font-bold text-health-success uppercase tracking-widest mb-2 flex items-center gap-2">
+                                        <ShieldCheck size={14} /> Key Strengths
+                                    </h5>
+                                    <p className="text-sm text-health-text-secondary">{infrastructureInfo.strength}</p>
+                                </div>
+                                <div className="p-4 rounded-xl bg-health-warning/10 border border-health-warning/20">
+                                    <h5 className="text-[10px] font-bold text-health-warning uppercase tracking-widest mb-2 flex items-center gap-2">
+                                        <AlertTriangle size={14} /> Potential Gaps
+                                    </h5>
+                                    <p className="text-sm text-health-text-secondary">{infrastructureInfo.gap}</p>
+                                </div>
+                                <div className="pt-4 border-t border-health-border">
+                                    <h5 className="text-[10px] font-bold text-primary-navy uppercase tracking-widest mb-2 flex items-center gap-2">
+                                        <MessageSquare size={14} className="text-primary-teal" /> Preventive Health Tip
+                                    </h5>
+                                    <p className="text-sm text-health-text-secondary italic">"{infrastructureInfo.tips}"</p>
+                                </div>
+                            </div>
+                        </section>
+                    )}
                 </div>
 
                 {/* Right column: Action Sidebar */}
@@ -189,11 +291,12 @@ const ProviderDetail = () => {
                                 </div>
                             </div>
                             <button
-                                onClick={() => setIsSaved(!isSaved)}
+                                onClick={handleSaveToggle}
+                                disabled={isLoadingSave}
                                 className={`p-3 rounded-2xl border-2 transition-all ${isSaved
                                     ? 'border-health-danger bg-health-danger/5 text-health-danger'
                                     : 'border-health-border hover:border-health-danger text-health-text-muted'
-                                    }`}
+                                    } ${isLoadingSave ? 'opacity-50 cursor-not-allowed' : ''}`}
                             >
                                 <Heart size={20} fill={isSaved ? "currentColor" : "none"} />
                             </button>

@@ -10,7 +10,10 @@
   }
 
   body {
-    @apply bg-health-bg text-health-text-primary font-sans antialiased;
+    @apply text-health-text-primary font-sans antialiased;
+    background: linear-gradient(-45deg, #F0F4F7, #ffffff, #E2F2F2, #F0F4F7);
+    background-size: 400% 400%;
+    animation: gradientBG 15s ease infinite;
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -20,6 +23,12 @@
   /* Monospace numbers for currency/stats */
   .tabular-nums {
     font-variant-numeric: tabular-nums;
+  }
+
+  @keyframes gradientBG {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
   }
 }
 

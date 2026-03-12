@@ -7,6 +7,9 @@ import {
 } from 'lucide-react';
 import { useNavigate, Link } from 'react-router-dom';
 import useEstimatorStore from '../../stores/useEstimatorStore';
+import useAuthStore from '../../stores/useAuthStore';
+import { db, auth } from '../../services/firebaseConfig';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import RiskGauge from '../../components/RiskGauge/RiskGauge';
 import CostComparisonCard from '../../components/CostComparisonCard/CostComparisonCard';
 import AlertBanner from '../../components/AlertBanner/AlertBanner';
@@ -15,7 +18,9 @@ import { medicalProcedures } from '../../data/medicalProcedures';
 
 const Results = () => {
     const { selectedProcedures, patientData } = useEstimatorStore();
+    const { user } = useAuthStore();
     const navigate = useNavigate();
+    const hasSavedRef = React.useRef(false);
 
     const allProceduresFlat = medicalProcedures.flatMap(cat => cat.procedures);
 
@@ -70,6 +75,44 @@ const Results = () => {
         alertTitle = "Medium Financial Risk Warning";
         alertMsg = "Your out-of-pocket costs may exceed your monthly savings capacity. Consider checking our verified payment plans to reduce immediate risk.";
     }
+
+    React.useEffect(() => {
+        const saveEstimate = async () => {
+            const currentUid = auth.currentUser?.uid || user?.uid;
+            
+            // If we have data and haven't saved this specific session's data yet
+            if (currentUid && !hasSavedRef.current && selectedProcedures.length > 0) {
+                // Check if we already saved an identical estimate recently (e.g. in the last 10 seconds)
+                // to prevent refresh double-counting if hasSavedRef resets.
+                const lastSavedTS = sessionStorage.getItem('last_estimate_saved_at');
+                const now = Date.now();
+                if (lastSavedTS && (now - parseInt(lastSavedTS)) < 15000) {
+                    return;
+                }
+
+                hasSavedRef.current = true;
+                sessionStorage.setItem('last_estimate_saved_at', now.toString());
+
+                try {
+                    await addDoc(collection(db, 'estimates'), {
+                        userId: currentUid,
+                        procedures: selectedProcedures,
+                        procedureName: selectedProcedures.join(', '),
+                        estimatedCost: totalMaxCost,
+                        riskScore: riskScoreRaw,
+                        createdAt: serverTimestamp()
+                    });
+                } catch (error) {
+                    console.error("Error saving estimate", error);
+                }
+            }
+        };
+        // Adding a slight delay to ensure auth state is ready
+        const timeoutId = setTimeout(() => {
+            saveEstimate();
+        }, 1000);
+        return () => clearTimeout(timeoutId);
+    }, [user, selectedProcedures, totalMaxCost, riskScoreRaw]);
 
     return (
         <div className="max-w-7xl mx-auto px-4 py-8 pb-20">
@@ -183,27 +226,6 @@ const Results = () => {
                                 * Prices are estimates based on regional averages and provided data. Public system costs are projected co-pays.
                             </p>
                         </div>
-                    </motion.div>
-
-                    {/* Suggestion Card */}
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.4 }}
-                        className="card-premium p-6 flex flex-col md:flex-row items-center justify-between border-primary-teal shadow-primary-teal/5 bg-primary-teal/[0.02]"
-                    >
-                        <div className="flex items-center space-x-4 mb-4 md:mb-0">
-                            <div className="w-12 h-12 rounded-full bg-primary-teal flex items-center justify-center text-white shadow-lg">
-                                <CreditCard size={24} />
-                            </div>
-                            <div>
-                                <h5 className="font-bold text-primary-navy">Lower your monthly risk</h5>
-                                <p className="text-xs text-health-text-secondary">You may qualify for a 0% interest payment plan spread over 12 months.</p>
-                            </div>
-                        </div>
-                        <button className="btn-primary !py-2 !px-6 text-sm shrink-0 whitespace-nowrap">
-                            Check Eligibility
-                        </button>
                     </motion.div>
                 </div>
             </div>

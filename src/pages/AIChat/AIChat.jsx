@@ -3,9 +3,10 @@ import { motion } from 'framer-motion';
 import { Send, Bot, User, Loader2, RefreshCw } from 'lucide-react';
 import useAuthStore from '../../stores/useAuthStore';
 import { db } from '../../services/firebaseConfig';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc, onSnapshot, collection, query, where, getDocs } from 'firebase/firestore';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import systemPrompt from '../../../ai-instructions.txt?raw';
+import { sampleProviders, infrastructureGaps } from '../../data/providersData';
 
 // Initialize Google Generative AI (requires VITE_GEMINI_API_KEY in .env)
 const rawKey = import.meta.env.VITE_GEMINI_API_KEY || import.meta.env.VITE_GOOGLE_API_KEY;
@@ -18,6 +19,7 @@ const AIChat = () => {
     const [input, setInput] = useState('');
     const [isTyping, setIsTyping] = useState(false);
     const [isInitializing, setIsInitializing] = useState(true);
+    const [userContext, setUserContext] = useState(null);
     const messagesEndRef = useRef(null);
 
     // Load chat history from Firebase on mount
@@ -46,7 +48,45 @@ const AIChat = () => {
             }
         };
 
-        loadChatHistory();
+        const fetchUserContext = async () => {
+            if (!user?.uid) return;
+            // Listen to saved providers
+            const userDocRef = doc(db, 'users', user.uid);
+            const unsubscribeContext = onSnapshot(userDocRef, async (docSnap) => {
+                let contextData = { savedProviders: [], estimates: [] };
+                if (docSnap.exists()) {
+                    const savedIds = docSnap.data().savedProviders || [];
+                    const resolvedProviders = savedIds.map(id => sampleProviders.find(p => p.id === id)).filter(Boolean);
+                    contextData.savedProviders = resolvedProviders;
+                }
+
+                // Try fetching recent estimates once
+                try {
+                    const q = query(collection(db, 'estimates'), where('userId', '==', user.uid));
+                    const estSnap = await getDocs(q);
+                    const estimates = [];
+                    estSnap.forEach(doc => estimates.push(doc.data()));
+                    contextData.estimates = estimates;
+                } catch (e) {
+                    console.error("Error fetching estimates:", e);
+                }
+                
+                setUserContext(contextData);
+            });
+            return unsubscribeContext;
+        };
+
+        let unsubscribe;
+        const initialize = async () => {
+            await loadChatHistory();
+            unsubscribe = await fetchUserContext();
+        };
+        
+        initialize();
+
+        return () => {
+            if (unsubscribe) unsubscribe();
+        };
     }, [user?.uid]);
 
     // Save messages to Firebase whenever they change significantly (new message added)
@@ -107,8 +147,36 @@ const AIChat = () => {
             // Always prepend system prompt to the actual message being sent
             // This ensures the AI always has context about its role
             const isFirstUserMessage = !validMessages.some(m => m.role === 'user');
+            
+            let contextString = '';
+            if (isFirstUserMessage && userContext) {
+                const providersText = userContext.savedProviders.map(p => 
+                    `- ${p.name} (${p.specialty}) at ${p.hospital}, ${p.city}. Cost: ${p.estimatedCost}. Quality: ${p.quality}.`
+                ).join('\n');
+                
+                const infrastructureText = userContext.savedProviders.map(p => p.city)
+                    .filter((v, i, a) => a.indexOf(v) === i) // unique cities
+                    .map(city => infrastructureGaps[city] ? `Infrastructure in ${city}: Strengths (${infrastructureGaps[city].strength}), Gaps (${infrastructureGaps[city].gap})` : '')
+                    .filter(Boolean)
+                    .join('\n');
+
+                const estimatesText = userContext.estimates.map(e => 
+                    `- ${e.procedureName} (Est: ₹${e.estimatedCost}) on ${new Date(e.createdAt?.toDate?.() || Date.now()).toLocaleDateString()}`
+                ).join('\n');
+
+                contextString = `\n[Context from User Profile]
+Name: ${user?.displayName || 'Unknown'}
+Saved Providers:
+${providersText || 'None yet'}
+Regional Infrastructure Constraints:
+${infrastructureText || 'None available'}
+Recent Cost Estimates:
+${estimatesText || 'None yet'}
+[End Context]\nPlease use this specific state to personalize your health education advice and cost analysis.\n\n`;
+            }
+
             const promptToSend = isFirstUserMessage
-                ? `[System Instructions]\n${systemPrompt}\n[End System Instructions]\n\nUser: ${userText}`
+                ? `[System Instructions]\n${systemPrompt}\n[End System Instructions]${contextString}User: ${userText}`
                 : userText;
 
             const chat = model.startChat({ history: apiHistory });

@@ -1,7 +1,10 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { Star, MapPin, ExternalLink, Calendar } from 'lucide-react';
+import { Star, MapPin, ExternalLink, Calendar, Heart } from 'lucide-react';
+import useAuthStore from '../../stores/useAuthStore';
+import { db } from '../../services/firebaseConfig';
+import { doc, getDoc, updateDoc, arrayUnion, arrayRemove } from 'firebase/firestore';
 
 const ProviderCard = ({ provider, index }) => {
     const {
@@ -10,6 +13,48 @@ const ProviderCard = ({ provider, index }) => {
     } = provider;
 
     const navigate = useNavigate();
+    const { user } = useAuthStore();
+    const [isSaved, setIsSaved] = useState(false);
+    const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        const checkSavedStatus = async () => {
+            if (user?.uid) {
+                const docRef = doc(db, 'users', user.uid);
+                const docSnap = await getDoc(docRef);
+                if (docSnap.exists()) {
+                    const saved = docSnap.data().savedProviders || [];
+                    setIsSaved(saved.includes(id));
+                }
+            }
+        };
+        checkSavedStatus();
+    }, [id, user]);
+
+    const toggleSave = async (e) => {
+        e.stopPropagation();
+        if (!user?.uid || loading) return;
+        
+        setLoading(true);
+        const docRef = doc(db, 'users', user.uid);
+        try {
+            if (isSaved) {
+                await updateDoc(docRef, {
+                    savedProviders: arrayRemove(id)
+                });
+                setIsSaved(false);
+            } else {
+                await updateDoc(docRef, {
+                    savedProviders: arrayUnion(id)
+                });
+                setIsSaved(true);
+            }
+        } catch (error) {
+            console.error("Error toggling save:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const badgeStyles = {
         "Excellent": "bg-health-success/10 text-health-success border-health-success/20",
@@ -37,10 +82,22 @@ const ProviderCard = ({ provider, index }) => {
                 <div className="absolute inset-0 bg-gradient-to-t from-primary-navy/40 to-transparent"></div>
 
                 {badge && (
-                    <div className={`absolute top-4 right-4 px-2.5 py-1 rounded-full text-[10px] font-bold border-2 backdrop-blur-md ${badgeStyles[badge] || 'bg-white/50 border-white'}`}>
+                    <div className={`absolute top-4 left-4 px-2.5 py-1 rounded-full text-[10px] font-bold border-2 backdrop-blur-md ${badgeStyles[badge] || 'bg-white/50 border-white'}`}>
                         {badge}
                     </div>
                 )}
+                
+                <button 
+                    onClick={toggleSave}
+                    disabled={loading}
+                    className={`absolute top-4 right-4 p-2 rounded-full backdrop-blur-md transition-all z-10 ${
+                        isSaved 
+                            ? 'bg-health-danger/90 text-white' 
+                            : 'bg-white/60 text-health-text-secondary hover:bg-white'
+                    }`}
+                >
+                    <Heart size={16} fill={isSaved ? "currentColor" : "none"} />
+                </button>
             </div>
 
             {/* Provider Details */}

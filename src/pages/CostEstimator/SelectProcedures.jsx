@@ -191,47 +191,53 @@ const SelectProcedures = () => {
 
             {/* Sticky Bottom Bar */}
             <AnimatePresence>
-                {selectedProcedures.length > 0 && (
-                    <motion.div
-                        initial={{ y: 100, opacity: 0 }}
-                        animate={{ y: 0, opacity: 1 }}
-                        exit={{ y: 100, opacity: 0 }}
-                        className="fixed bottom-0 left-0 right-0 bg-white border-t border-health-border px-4 py-4 z-40 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]"
-                    >
-                        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between">
-                            <div className="flex flex-col mb-4 md:mb-0">
-                                <div className="flex items-center space-x-2">
-                                    <span className="text-sm font-bold text-primary-navy">Selected Procedures ({selectedProcedures.length})</span>
-                                    <div className="h-1.5 w-1.5 rounded-full bg-primary-teal"></div>
-                                </div>
-                                <div className="flex flex-wrap gap-x-2">
-                                    {selectedProcedures.map((p, i) => (
+                <div
+                    className="fixed bottom-0 left-0 right-0 bg-white border-t border-health-border px-4 py-4 z-40 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]"
+                >
+                    <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between">
+                        <div className="flex flex-col mb-4 md:mb-0">
+                            <div className="flex items-center space-x-2">
+                                <span className={`text-sm font-bold ${selectedProcedures.length > 0 ? 'text-primary-navy' : 'text-health-text-muted'}`}>
+                                    Selected Procedures ({selectedProcedures.length})
+                                </span>
+                                {selectedProcedures.length > 0 && <div className="h-1.5 w-1.5 rounded-full bg-primary-teal"></div>}
+                            </div>
+                            <div className="flex flex-wrap gap-x-2">
+                                {selectedProcedures.length === 0 ? (
+                                    <span className="text-xs text-health-text-muted italic">Select at least one procedure to continue</span>
+                                ) : (
+                                    selectedProcedures.map((p, i) => (
                                         <span key={p} className="text-xs text-primary-teal font-medium">
                                             {p}{i < selectedProcedures.length - 1 ? ',' : ''}
                                         </span>
-                                    ))}
-                                </div>
-                            </div>
-
-                            <div className="flex items-center space-x-4">
-                                <button
-                                    onClick={() => navigate('/cost-estimator/step-1')}
-                                    className="px-6 py-2.5 text-health-text-secondary font-semibold hover:text-primary-navy transition-colors flex items-center space-x-2"
-                                >
-                                    <ChevronLeft size={18} />
-                                    <span>Back</span>
-                                </button>
-                                <button
-                                    onClick={() => navigate('/cost-estimator/results')}
-                                    className="btn-primary flex items-center space-x-3 px-8"
-                                >
-                                    <span className="font-bold">Generate Estimate</span>
-                                    <ArrowRight size={20} />
-                                </button>
+                                    ))
+                                )}
                             </div>
                         </div>
-                    </motion.div>
-                )}
+
+                        <div className="flex items-center space-x-4">
+                            <button
+                                onClick={() => navigate('/cost-estimator/step-1')}
+                                className="px-6 py-2.5 text-health-text-secondary font-semibold hover:text-primary-navy transition-colors flex items-center space-x-2"
+                            >
+                                <ChevronLeft size={18} />
+                                <span>Back</span>
+                            </button>
+                            <button
+                                onClick={() => navigate('/cost-estimator/results')}
+                                disabled={selectedProcedures.length === 0}
+                                className={`flex items-center space-x-3 px-8 transition-all ${
+                                    selectedProcedures.length > 0
+                                        ? 'btn-primary'
+                                        : 'bg-health-border text-health-text-muted rounded-xl py-3 font-bold cursor-not-allowed hidden sm:flex'
+                                }`}
+                            >
+                                <span className="font-bold">Generate Estimate</span>
+                                <ArrowRight size={20} />
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </AnimatePresence>
         </div>
     );

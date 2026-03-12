@@ -5,7 +5,7 @@ import StepProgress from '../../components/StepProgress/StepProgress';
 import { useNavigate } from 'react-router-dom';
 import useEstimatorStore from '../../stores/useEstimatorStore';
 import { db, auth } from '../../services/firebaseConfig';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
 
 const PatientProfile = () => {
     const navigate = useNavigate();
@@ -20,35 +20,30 @@ const PatientProfile = () => {
         }).format(val);
     };
 
-    const [profile, setProfile] = useState({
-        firstName: '',
-        lastName: '',
-        zipCode: ''
-    });
+    const [formError, setFormError] = useState('');
 
     useEffect(() => {
         const fetchUserData = async () => {
-            if (auth.currentUser) {
+            // Only fetch from Firebase if store is empty
+            if (auth.currentUser && !patientData.firstName) {
                 const userRef = doc(db, 'users', auth.currentUser.uid);
                 const docSnap = await getDoc(userRef);
                 if (docSnap.exists()) {
                     const data = docSnap.data();
-                    setProfile({
+                    setPatientData({
                         firstName: data.firstName || auth.currentUser.displayName?.split(' ')[0] || '',
                         lastName: data.lastName || auth.currentUser.displayName?.split(' ')[1] || '',
-                        zipCode: data.address?.match(/\b\d{5}\b/)?.[0] || ''
+                        zipCode: data.address?.match(/\b\d{5}\b/)?.[0] || data.address || '',
+                        dob: data.dob || '',
+                        insurance: data.insurance || '',
+                        memberId: data.memberId || '',
+                        income: data.income || 75000
                     });
-                } else if (auth.currentUser.displayName) {
-                    setProfile(prev => ({
-                        ...prev,
-                        firstName: auth.currentUser.displayName.split(' ')[0] || '',
-                        lastName: auth.currentUser.displayName.split(' ')[1] || '',
-                    }));
                 }
             }
         };
         fetchUserData();
-    }, []);
+    }, [auth.currentUser, patientData.firstName]); // Keep patientData.firstName in deps to re-check if we should fetch
 
     return (
         <div className="max-w-4xl mx-auto px-4 py-8">
@@ -83,6 +78,13 @@ const PatientProfile = () => {
                         </div>
                     </div>
 
+                    {formError && (
+                        <div className="mb-6 p-4 bg-health-warning/10 border border-health-warning text-health-warning rounded-xl text-sm font-bold flex items-center">
+                            <Info size={18} className="mr-2" />
+                            {formError}
+                        </div>
+                    )}
+
                     <form className="space-y-10">
                         {/* Personal Information */}
                         <section>
@@ -96,19 +98,19 @@ const PatientProfile = () => {
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
                                     <label className="block text-sm font-semibold text-health-text-secondary mb-2">First Name</label>
-                                    <input type="text" value={profile.firstName} onChange={e => setProfile({ ...profile, firstName: e.target.value })} className="input-standard" />
+                                    <input type="text" value={patientData.firstName || ''} onChange={e => setPatientData({ firstName: e.target.value })} className="input-standard" />
                                 </div>
                                 <div>
                                     <label className="block text-sm font-semibold text-health-text-secondary mb-2">Last Name</label>
-                                    <input type="text" value={profile.lastName} onChange={e => setProfile({ ...profile, lastName: e.target.value })} className="input-standard" />
+                                    <input type="text" value={patientData.lastName || ''} onChange={e => setPatientData({ lastName: e.target.value })} className="input-standard" />
                                 </div>
                                 <div>
                                     <label className="block text-sm font-semibold text-health-text-secondary mb-2">Date of Birth</label>
-                                    <input type="date" defaultValue="1988-03-15" className="input-standard" />
+                                    <input type="date" value={patientData.dob || ''} onChange={e => setPatientData({ dob: e.target.value })} className="input-standard" />
                                 </div>
                                 <div>
                                     <label className="block text-sm font-semibold text-health-text-secondary mb-2">Zip Code</label>
-                                    <input type="text" value={profile.zipCode} onChange={e => setProfile({ ...profile, zipCode: e.target.value })} className="input-standard" />
+                                    <input type="text" value={patientData.zipCode || ''} onChange={e => setPatientData({ zipCode: e.target.value })} className="input-standard" />
                                 </div>
                             </div>
                         </section>
@@ -155,7 +157,8 @@ const PatientProfile = () => {
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div>
                                         <label className="block text-sm font-semibold text-health-text-secondary mb-2">Insurance Provider</label>
-                                        <select className="input-standard appearance-none">
+                                        <select value={patientData.insurance || ''} onChange={e => setPatientData({ insurance: e.target.value })} className="input-standard appearance-none">
+                                            <option value="">Select Provider</option>
                                             <option value="blue-shield">Blue Shield</option>
                                             <option value="kaiser">Kaiser Permanente</option>
                                             <option value="aetna">Aetna</option>
@@ -164,7 +167,7 @@ const PatientProfile = () => {
                                     </div>
                                     <div>
                                         <label className="block text-sm font-semibold text-health-text-secondary mb-2">Member ID</label>
-                                        <input type="text" defaultValue="XYZ-123456789" className="input-standard" />
+                                        <input type="text" placeholder="e.g. XYZ-123456789" value={patientData.memberId || ''} onChange={e => setPatientData({ memberId: e.target.value })} className="input-standard" />
                                     </div>
                                 </div>
                             </div>
@@ -181,7 +184,33 @@ const PatientProfile = () => {
                             </button>
                             <button
                                 type="button"
-                                onClick={() => navigate('/cost-estimator/step-2')}
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    // Basic validation using store values
+                                    if (!patientData.firstName || !patientData.lastName || !patientData.dob || !patientData.zipCode) {
+                                        setFormError("Please fill in your first name, last name, date of birth, and zip code to continue.");
+                                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                                        return;
+                                    }
+                                    
+                                    setFormError('');
+
+                                    if(auth.currentUser) {
+                                        const firebaseData = {
+                                            firstName: patientData.firstName,
+                                            lastName: patientData.lastName,
+                                            dob: patientData.dob,
+                                            address: patientData.zipCode, // Mapping zip to address
+                                            insurance: patientData.insurance || '',
+                                            memberId: patientData.memberId || '',
+                                            income: patientData.income || 75000
+                                        };
+                                        
+                                        setDoc(doc(db, 'users', auth.currentUser.uid), firebaseData, { merge: true })
+                                            .catch(err => console.error("Error saving profile:", err));
+                                    }
+                                    navigate('/cost-estimator/step-2');
+                                }}
                                 className="btn-primary flex items-center space-x-2"
                             >
                                 <span>Generate Accuracy Estimate</span>
