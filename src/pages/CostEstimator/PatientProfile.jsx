@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { User, DollarSign, Info, ChevronRight } from 'lucide-react';
+import { User, DollarSign, Info, ChevronRight, MapPin } from 'lucide-react';
 import StepProgress from '../../components/StepProgress/StepProgress';
 import { useNavigate } from 'react-router-dom';
 import useEstimatorStore from '../../stores/useEstimatorStore';
@@ -24,7 +24,6 @@ const PatientProfile = () => {
 
     useEffect(() => {
         const fetchUserData = async () => {
-            // Only fetch from Firebase if store is empty
             if (auth.currentUser && !patientData.firstName) {
                 const userRef = doc(db, 'users', auth.currentUser.uid);
                 const docSnap = await getDoc(userRef);
@@ -43,181 +42,182 @@ const PatientProfile = () => {
             }
         };
         fetchUserData();
-    }, [auth.currentUser, patientData.firstName]); // Keep patientData.firstName in deps to re-check if we should fetch
+    }, [auth.currentUser, patientData.firstName]);
 
     return (
-        <div className="max-w-4xl mx-auto px-4 py-8">
-            <div className="mb-6">
-                <h1 className="text-3xl font-bold text-primary-navy mb-1">Check My Risk</h1>
-                <p className="text-health-text-secondary">Provide your details to get a personalized cost estimate.</p>
-            </div>
-
+        <div className="max-w-4xl mx-auto px-4 py-16">
             <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="card-premium overflow-hidden"
+                initial={{ opacity: 0, scale: 0.98 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="card-premium p-10 md:p-16 relative overflow-hidden"
             >
-                <div className="p-8">
-                    <StepProgress
-                        currentStep={1}
-                        totalSteps={3}
-                        title="Patient Profile"
-                        nextTitle="Medical History"
-                    />
+                {/* Decorative background element */}
+                <div className="absolute top-0 right-0 w-64 h-64 bg-primary-teal/5 rounded-full -translate-y-1/2 translate-x-1/2 -z-10"></div>
+                
+                <div className="mb-12">
+                    <span className="text-[10px] font-black text-primary-teal uppercase tracking-[0.3em] mb-4 block">Step 01 / 03</span>
+                    <h2 className="text-4xl md:text-5xl font-black text-primary-navy tracking-tighter leading-none mb-6">
+                        Patient <span className="text-gradient">Information</span>
+                    </h2>
+                    <p className="text-health-text-secondary text-lg font-medium leading-relaxed">
+                        Please provide the accurate details of the patient to ensure we generate the most precise cost risk analysis.
+                    </p>
+                </div>
 
-                    {/* Hero Banner */}
-                    <div className="relative h-32 rounded-2xl overflow-hidden mb-10 bg-gradient-to-r from-primary-navy to-primary-teal flex items-center px-8">
-                        <div className="z-10">
-                            <h3 className="text-xl font-bold text-white mb-1">Demographics & Insurance</h3>
-                            <p className="text-white/70 text-sm">Help us understand your coverage and eligibility.</p>
+                {formError && (
+                    <motion.div
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="mb-10 p-5 bg-health-danger/5 border-l-4 border-health-danger text-health-danger rounded-xl flex items-center space-x-3"
+                    >
+                        <Info size={20} className="shrink-0" />
+                        <span className="text-sm font-bold">{formError}</span>
+                    </motion.div>
+                )}
+
+                <div className="space-y-12">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                        <div className="space-y-3">
+                            <label className="text-[11px] font-black text-primary-navy uppercase tracking-widest ml-1">First Name</label>
+                            <input
+                                type="text"
+                                value={patientData.firstName || ''}
+                                onChange={(e) => setPatientData({ firstName: e.target.value })}
+                                className="input-standard"
+                                placeholder="Enter first name"
+                            />
                         </div>
-                        {/* 3D Geometric Decoration Placeholder */}
-                        <div className="absolute right-0 top-0 h-full w-1/3 opacity-20 pointer-events-none">
-                            <div className="absolute top-1/2 right-4 -translate-y-1/2 w-24 h-24 border-4 border-white rotate-12"></div>
-                            <div className="absolute top-1/4 right-16 w-12 h-12 bg-white rounded-full"></div>
+                        <div className="space-y-3">
+                            <label className="text-[11px] font-black text-primary-navy uppercase tracking-widest ml-1">Last Name</label>
+                            <input
+                                type="text"
+                                value={patientData.lastName || ''}
+                                onChange={(e) => setPatientData({ lastName: e.target.value })}
+                                className="input-standard"
+                                placeholder="Enter last name"
+                            />
                         </div>
                     </div>
 
-                    {formError && (
-                        <div className="mb-6 p-4 bg-health-warning/10 border border-health-warning text-health-warning rounded-xl text-sm font-bold flex items-center">
-                            <Info size={18} className="mr-2" />
-                            {formError}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                        <div className="space-y-3">
+                            <label className="text-[11px] font-black text-primary-navy uppercase tracking-widest ml-1">Date of Birth</label>
+                            <input
+                                type="date"
+                                value={patientData.dob || ''}
+                                onChange={(e) => setPatientData({ dob: e.target.value })}
+                                className="input-standard"
+                            />
                         </div>
-                    )}
-
-                    <form className="space-y-10">
-                        {/* Personal Information */}
-                        <section>
-                            <div className="flex items-center space-x-2 mb-6">
-                                <div className="p-2 bg-primary-teal/10 rounded-lg text-primary-teal">
-                                    <User size={20} />
-                                </div>
-                                <h4 className="text-lg font-bold text-primary-navy">Personal Information</h4>
-                                <div className="flex-grow border-t border-health-border ml-4"></div>
+                        <div className="space-y-3">
+                            <label className="text-[11px] font-black text-primary-navy uppercase tracking-widest ml-1">Location Zip Code</label>
+                            <div className="relative">
+                                <input
+                                    type="text"
+                                    value={patientData.zipCode || ''}
+                                    onChange={(e) => setPatientData({ zipCode: e.target.value })}
+                                    className="input-standard pl-12"
+                                    placeholder="e.g. 110001"
+                                />
+                                <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-primary-teal" size={18} />
                             </div>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div>
-                                    <label className="block text-sm font-semibold text-health-text-secondary mb-2">First Name</label>
-                                    <input type="text" value={patientData.firstName || ''} onChange={e => setPatientData({ firstName: e.target.value })} className="input-standard" />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-semibold text-health-text-secondary mb-2">Last Name</label>
-                                    <input type="text" value={patientData.lastName || ''} onChange={e => setPatientData({ lastName: e.target.value })} className="input-standard" />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-semibold text-health-text-secondary mb-2">Date of Birth</label>
-                                    <input type="date" value={patientData.dob || ''} onChange={e => setPatientData({ dob: e.target.value })} className="input-standard" />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-semibold text-health-text-secondary mb-2">Zip Code</label>
-                                    <input type="text" value={patientData.zipCode || ''} onChange={e => setPatientData({ zipCode: e.target.value })} className="input-standard" />
-                                </div>
-                            </div>
-                        </section>
-
-                        {/* Financial Details */}
-                        <section>
-                            <div className="flex items-center space-x-2 mb-6">
-                                <div className="p-2 bg-primary-teal/10 rounded-lg text-primary-teal">
-                                    <DollarSign size={20} />
-                                </div>
-                                <h4 className="text-lg font-bold text-primary-navy">Financial Details</h4>
-                                <div className="flex-grow border-t border-health-border ml-4"></div>
-                            </div>
-
-                            <div className="space-y-8">
-                                <div>
-                                    <div className="flex justify-between items-center mb-4">
-                                        <label className="text-sm font-semibold text-health-text-secondary">Annual Household Income</label>
-                                        <span className="text-xl font-bold text-primary-navy tabular-nums">{formatCurrency(income)}</span>
-                                    </div>
-                                    <input
-                                        type="range"
-                                        min="0"
-                                        max="2500000"
-                                        step="10000"
-                                        value={income}
-                                        onChange={(e) => setPatientData({ income: Number(e.target.value) })}
-                                        className="w-full h-2 bg-health-border rounded-full appearance-none cursor-pointer accent-primary-teal"
-                                    />
-                                    <div className="flex justify-between mt-2 text-[10px] font-bold text-health-text-muted uppercase tracking-wider">
-                                        <span>₹0</span>
-                                        <span>₹12.5L</span>
-                                        <span>₹25L+</span>
-                                    </div>
-                                </div>
-
-                                <div className="bg-health-bg/50 p-4 rounded-xl border border-health-border flex items-start space-x-3">
-                                    <Info size={18} className="text-primary-teal mt-0.5 shrink-0" />
-                                    <p className="text-xs text-health-text-secondary leading-relaxed">
-                                        Used to calculate sliding scale eligibility and maximum out-of-pocket estimates.
-                                    </p>
-                                </div>
-
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div>
-                                        <label className="block text-sm font-semibold text-health-text-secondary mb-2">Insurance Provider</label>
-                                        <select value={patientData.insurance || ''} onChange={e => setPatientData({ insurance: e.target.value })} className="input-standard appearance-none">
-                                            <option value="">Select Provider</option>
-                                            <option value="blue-shield">Blue Shield</option>
-                                            <option value="kaiser">Kaiser Permanente</option>
-                                            <option value="aetna">Aetna</option>
-                                            <option value="united">UnitedHealthcare</option>
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-semibold text-health-text-secondary mb-2">Member ID</label>
-                                        <input type="text" placeholder="e.g. XYZ-123456789" value={patientData.memberId || ''} onChange={e => setPatientData({ memberId: e.target.value })} className="input-standard" />
-                                    </div>
-                                </div>
-                            </div>
-                        </section>
-
-                        {/* Bottom Actions */}
-                        <div className="flex justify-between items-center pt-6 border-t border-health-border">
-                            <button
-                                type="button"
-                                onClick={() => navigate('/dashboard')}
-                                className="px-6 py-2.5 text-health-text-secondary font-semibold hover:text-primary-navy transition-colors"
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                type="button"
-                                onClick={(e) => {
-                                    e.preventDefault();
-                                    // Basic validation using store values
-                                    if (!patientData.firstName || !patientData.lastName || !patientData.dob || !patientData.zipCode) {
-                                        setFormError("Please fill in your first name, last name, date of birth, and zip code to continue.");
-                                        window.scrollTo({ top: 0, behavior: 'smooth' });
-                                        return;
-                                    }
-                                    
-                                    setFormError('');
-
-                                    if(auth.currentUser) {
-                                        const firebaseData = {
-                                            firstName: patientData.firstName,
-                                            lastName: patientData.lastName,
-                                            dob: patientData.dob,
-                                            address: patientData.zipCode, // Mapping zip to address
-                                            insurance: patientData.insurance || '',
-                                            memberId: patientData.memberId || '',
-                                            income: patientData.income || 75000
-                                        };
-                                        
-                                        setDoc(doc(db, 'users', auth.currentUser.uid), firebaseData, { merge: true })
-                                            .catch(err => console.error("Error saving profile:", err));
-                                    }
-                                    navigate('/cost-estimator/step-2');
-                                }}
-                                className="btn-primary flex items-center space-x-2"
-                            >
-                                <span>Generate Accuracy Estimate</span>
-                                <ChevronRight size={18} />
-                            </button>
                         </div>
-                    </form>
+                    </div>
+
+                    <div className="p-10 bg-health-bg/50 rounded-[40px] border border-health-border space-y-10">
+                        <div className="flex justify-between items-center">
+                             <h4 className="text-sm font-black text-primary-navy uppercase tracking-widest flex items-center">
+                                <DollarSign className="mr-3 text-primary-teal" size={18} /> Financial & Insurance Coverage
+                            </h4>
+                            <div className="text-right">
+                                <span className="text-[10px] font-black text-health-text-muted uppercase tracking-widest block mb-1">Annual Range</span>
+                                <span className="text-lg font-black text-primary-navy">{formatCurrency(income)}</span>
+                            </div>
+                        </div>
+
+                        <div className="space-y-6">
+                            <input
+                                type="range"
+                                min="0"
+                                max="2500000"
+                                step="10000"
+                                value={income}
+                                onChange={(e) => setPatientData({ income: Number(e.target.value) })}
+                                className="w-full h-2 bg-health-border rounded-full appearance-none cursor-pointer accent-primary-teal shadow-inner"
+                            />
+                            <div className="flex justify-between text-[10px] font-black text-health-text-muted uppercase tracking-wider">
+                                <span>₹0</span>
+                                <span>₹12.5L</span>
+                                <span>₹25L+</span>
+                            </div>
+                        </div>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                            <div className="space-y-3">
+                                <label className="text-[11px] font-black text-primary-navy uppercase tracking-widest ml-1">Insurance Provider</label>
+                                <select 
+                                    value={patientData.insurance || ''} 
+                                    onChange={e => setPatientData({ insurance: e.target.value })} 
+                                    className="input-standard appearance-none"
+                                >
+                                    <option value="">Select Provider</option>
+                                    <option value="star-health">Star Health</option>
+                                    <option value="lic">LIC Health</option>
+                                    <option value="max-bupa">Max Bupa</option>
+                                    <option value="care">Care Health</option>
+                                </select>
+                            </div>
+                            <div className="space-y-3">
+                                <label className="text-[11px] font-black text-primary-navy uppercase tracking-widest ml-1">Member ID (Optional)</label>
+                                <input
+                                    type="text"
+                                    value={patientData.memberId || ''}
+                                    onChange={(e) => setPatientData({ memberId: e.target.value })}
+                                    className="input-standard"
+                                    placeholder="ID number"
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="pt-10 flex border-t border-health-border items-center justify-between">
+                        <button
+                            type="button"
+                            onClick={() => navigate('/dashboard')}
+                            className="text-xs font-black text-health-text-muted hover:text-primary-navy transition-colors uppercase tracking-[0.2em]"
+                        >
+                            Cancel Analysis
+                        </button>
+                        <button
+                            type="button"
+                            onClick={(e) => {
+                                e.preventDefault();
+                                if (!patientData.firstName || !patientData.lastName || !patientData.dob || !patientData.zipCode) {
+                                    setFormError("Please fill in first name, last name, date of birth, and zip code.");
+                                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                                    return;
+                                }
+                                setFormError('');
+                                if(auth.currentUser) {
+                                    const firebaseData = {
+                                        firstName: patientData.firstName,
+                                        lastName: patientData.lastName,
+                                        dob: patientData.dob,
+                                        address: patientData.zipCode,
+                                        insurance: patientData.insurance || '',
+                                        memberId: patientData.memberId || '',
+                                        income: patientData.income || 75000
+                                    };
+                                    setDoc(doc(db, 'users', auth.currentUser.uid), firebaseData, { merge: true });
+                                }
+                                navigate('/cost-estimator/step-2');
+                            }}
+                            className="btn-primary px-12 group shadow-2xl shadow-primary-teal/20"
+                        >
+                            <span>Next Step</span>
+                            <ChevronRight className="ml-2 group-hover:translate-x-1 transition-transform" />
+                        </button>
+                    </div>
                 </div>
             </motion.div>
         </div>

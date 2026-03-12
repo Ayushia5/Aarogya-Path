@@ -2,11 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     Search, Bell, User, Menu, X, Plus,
-    ChevronDown, LayoutDashboard, Search as SearchIcon,
-    Users, ShieldCheck, LogOut, Settings
+    LayoutDashboard, Search as SearchIcon,
+    Users, ShieldCheck, LogOut, Settings,
+    ChevronDown, Heart
 } from 'lucide-react';
 import useAuthStore from '../../stores/useAuthStore';
 import { Link, useLocation } from 'react-router-dom';
+import TopBar from './TopBar';
 
 const Navbar = () => {
     const { isLoggedIn, user, logout } = useAuthStore();
@@ -16,205 +18,182 @@ const Navbar = () => {
     const location = useLocation();
 
     useEffect(() => {
-        const handleScroll = () => setIsScrolled(window.scrollY > 60);
+        const handleScroll = () => setIsScrolled(window.scrollY > 40);
         window.addEventListener('scroll', handleScroll);
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
 
     const navLinks = isLoggedIn
         ? [
-            { name: 'Dashboard', path: '/dashboard', icon: <LayoutDashboard size={18} /> },
-            { name: 'Cost Risk Estimator', path: '/cost-estimator/step-1', icon: <SearchIcon size={18} /> },
-            { name: 'Find Providers', path: '/providers', icon: <Users size={18} /> },
-            { name: 'AI Chat', path: '/ai-chat', icon: <ShieldCheck size={18} /> },
+            { name: 'Dashboard', path: '/dashboard', icon: <LayoutDashboard size={14} /> },
+            { name: 'Cost Estimator', path: '/cost-estimator/step-1', icon: <SearchIcon size={14} /> },
+            { name: 'Providers', path: '/providers', icon: <Users size={14} /> },
+            { name: 'AI Assistant', path: '/ai-chat', icon: <Heart size={14} /> },
         ]
         : [
             { name: 'How It Works', path: '/#how-it-works' },
+            { name: 'Our Services', path: '/#services' },
             { name: 'Providers', path: '/providers' },
+            { name: 'About Us', path: '/about' },
         ];
 
-    const navbarClasses = `fixed top-0 w-full z-50 transition-all duration-300 ${isScrolled
-        ? 'bg-white/90 backdrop-blur-md border-b border-health-border'
-        : 'bg-transparent'
-        }`;
-
     return (
-        <nav className={navbarClasses}>
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="flex justify-between items-center h-16">
-                    {/* Logo */}
-                    <Link to="/" className="flex items-center space-x-2 group">
-                        <div className="bg-primary-teal p-1.5 rounded-lg transition-transform group-hover:scale-110">
-                            <Plus className="text-white" size={20} strokeWidth={3} />
-                        </div>
-                        <span className="text-2xl font-bold text-primary-navy tracking-tight">
-                            Aarogya Path
-                        </span>
-                    </Link>
-
-                    {/* Desktop Nav Links */}
-                    <div className="hidden md:flex items-center space-x-8">
-                        {navLinks.map((link) => (
-                            <Link
-                                key={link.name}
-                                to={link.path}
-                                className={`text-sm font-medium transition-colors hover:text-primary-teal flex items-center space-x-2 ${location.pathname === link.path ? 'text-primary-teal' : 'text-health-text-secondary'
-                                    }`}
-                            >
-                                {link.icon && <span>{link.icon}</span>}
-                                <span>{link.name}</span>
-                            </Link>
-                        ))}
-                    </div>
-
-                    {/* Right Side Actions */}
-                    <div className="flex items-center space-x-4">
-                        {isLoggedIn ? (
-                            <div className="hidden md:flex items-center space-x-6">
-                                {/* Search Bar */}
-                                <div className="relative">
-                                    <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                        <Search className="text-health-text-muted" size={16} />
-                                    </span>
-                                    <input
-                                        type="text"
-                                        placeholder="Search providers, costs..."
-                                        className="pl-10 pr-4 py-2 bg-health-bg border border-health-border rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-primary-teal/20 focus:border-primary-teal transition-all w-64"
-                                    />
-                                </div>
-
-                                {/* Notifications */}
-                                <div className="relative cursor-pointer hover:bg-health-bg p-2 rounded-full transition-colors">
-                                    <Bell className="text-health-text-secondary" size={20} />
-                                    <span className="absolute top-1.5 right-1.5 bg-health-danger text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full border-2 border-white">
-                                        3
-                                    </span>
-                                </div>
-
-                                {/* Profile Dropdown */}
-                                <div className="relative">
-                                    <button
-                                        onClick={() => setIsProfileOpen(!isProfileOpen)}
-                                        className="flex items-center space-x-1 focus:outline-none"
-                                    >
-                                        <div className="w-9 h-9 rounded-full border-2 border-primary-teal overflow-hidden hover:opacity-80 transition-opacity">
-                                            <img
-                                                src={user?.photoURL || 'https://i.pravatar.cc/150?u=jane'}
-                                                alt="Avatar"
-                                                className="w-full h-full object-cover"
-                                            />
-                                        </div>
-                                    </button>
-
-                                    <AnimatePresence>
-                                        {isProfileOpen && (
-                                            <>
-                                                <div className="fixed inset-0 z-40" onClick={() => setIsProfileOpen(false)}></div>
-                                                <motion.div
-                                                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                                                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                                                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                                                    transition={{ duration: 0.2 }}
-                                                    className="absolute right-0 mt-2 w-48 bg-white border border-health-border rounded-xl shadow-xl z-50 overflow-hidden"
-                                                >
-                                                    <div className="px-4 py-3 border-b border-health-border bg-health-bg/50">
-                                                        <p className="text-xs text-health-text-muted">Signed in as</p>
-                                                        <p className="text-sm font-semibold truncate">{user?.email || 'Sarah Jenkins'}</p>
-                                                    </div>
-                                                    <div className="py-1">
-                                                        <Link
-                                                            to="/settings"
-                                                            className="flex items-center px-4 py-2 text-sm text-health-text-secondary hover:bg-health-bg hover:text-primary-teal transition-colors"
-                                                            onClick={() => setIsProfileOpen(false)}
-                                                        >
-                                                            <User size={16} className="mr-3" />
-                                                            My Profile
-                                                        </Link>
-                                                        <Link
-                                                            to="/settings"
-                                                            className="flex items-center px-4 py-2 text-sm text-health-text-secondary hover:bg-health-bg hover:text-primary-teal transition-colors"
-                                                            onClick={() => setIsProfileOpen(false)}
-                                                        >
-                                                            <Settings size={16} className="mr-3" />
-                                                            Settings
-                                                        </Link>
-                                                        <button
-                                                            onClick={() => {
-                                                                logout();
-                                                                setIsProfileOpen(false);
-                                                            }}
-                                                            className="w-full flex items-center px-4 py-2 text-sm text-health-danger hover:bg-health-danger/5 transition-colors"
-                                                        >
-                                                            <LogOut size={16} className="mr-3" />
-                                                            Sign Out
-                                                        </button>
-                                                    </div>
-                                                </motion.div>
-                                            </>
-                                        )}
-                                    </AnimatePresence>
-                                </div>
+        <header className={`fixed top-0 w-full z-50 transition-all duration-500 ${isScrolled ? '-translate-y-10' : 'translate-y-0'}`}>
+            <TopBar />
+            <nav className={`w-full transition-all duration-500 ${
+                isScrolled 
+                    ? 'bg-white/95 backdrop-blur-md shadow-xl border-b border-health-border py-2' 
+                    : 'bg-white py-4'
+            }`}>
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="flex justify-between items-center">
+                        {/* Logo */}
+                        <Link to="/" className="flex items-center space-x-3 group">
+                            <div className="bg-primary-teal p-2 rounded-xl transition-all duration-500 group-hover:rotate-12 group-hover:scale-110 shadow-lg shadow-primary-teal/20">
+                                <Plus className="text-white" size={20} strokeWidth={3} />
                             </div>
-                        ) : (
-                            <div className="hidden md:flex items-center space-x-6">
-                                <Link to="/signup" className="btn-outline !py-1.5 !px-5 text-sm">
-                                    Sign Up
-                                </Link>
+                            <div className="flex flex-col">
+                                <span className="text-xl font-black text-primary-navy tracking-tighter leading-none">
+                                    HealthClear
+                                </span>
+                                <span className="text-[9px] font-bold text-primary-teal uppercase tracking-[0.2em] mt-1">
+                                    Aarogya Path
+                                </span>
                             </div>
-                        )}
+                        </Link>
 
-                        {/* Mobile menu button */}
-                        <div className="md:hidden flex items-center">
-                            <button
-                                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                                className="text-health-text-secondary hover:text-primary-teal p-2"
-                            >
-                                {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            {/* Mobile menu */}
-            <AnimatePresence>
-                {isMobileMenuOpen && (
-                    <motion.div
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: 'auto', opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        className="md:hidden bg-white border-b border-health-border overflow-hidden"
-                    >
-                        <div className="px-4 pt-2 pb-6 space-y-1">
+                        {/* Desktop Nav Links */}
+                        <div className="hidden lg:flex items-center space-x-1">
                             {navLinks.map((link) => (
                                 <Link
                                     key={link.name}
                                     to={link.path}
-                                    className="block px-3 py-4 text-base font-medium text-health-text-secondary hover:text-primary-teal hover:bg-health-bg rounded-lg border-l-4 border-transparent hover:border-primary-teal transition-all"
-                                    onClick={() => setIsMobileMenuOpen(false)}
+                                    className={`px-4 py-2 rounded-full text-sm font-bold transition-all duration-300 flex items-center space-x-2 ${
+                                        location.pathname === link.path 
+                                            ? 'text-primary-teal bg-primary-teal/5' 
+                                            : 'text-health-text-secondary hover:text-primary-teal hover:bg-primary-teal/5'
+                                    }`}
                                 >
-                                    <div className="flex items-center space-x-3">
-                                        {link.icon && <span>{link.icon}</span>}
-                                        <span>{link.name}</span>
-                                    </div>
+                                    {link.icon && <span>{link.icon}</span>}
+                                    <span>{link.name}</span>
                                 </Link>
                             ))}
-                            {!isLoggedIn && (
-                                <div className="pt-4 border-t border-health-border mt-4">
-                                    <Link
-                                        to="/signup"
-                                        className="block w-full text-center px-4 py-3 bg-primary-teal text-white rounded-lg font-bold shadow-lg"
-                                        onClick={() => setIsMobileMenuOpen(false)}
-                                    >
-                                        Sign Up Now
+                        </div>
+
+                        {/* Right Side Actions */}
+                        <div className="flex items-center space-x-4">
+                            {isLoggedIn ? (
+                                <div className="hidden lg:flex items-center space-x-4">
+                                    <div className="relative group">
+                                        <button
+                                            onClick={() => setIsProfileOpen(!isProfileOpen)}
+                                            className="flex items-center space-x-3 bg-health-bg/50 px-4 py-2 rounded-full border border-health-border hover:border-primary-teal transition-all group-hover:shadow-md"
+                                        >
+                                            <div className="w-8 h-8 rounded-full border-2 border-primary-teal overflow-hidden shadow-sm">
+                                                <img
+                                                    src={user?.photoURL || 'https://i.pravatar.cc/150?u=jane'}
+                                                    alt="Avatar"
+                                                    className="w-full h-full object-cover"
+                                                />
+                                            </div>
+                                            <span className="text-xs font-bold text-primary-navy truncate max-w-[80px]">
+                                                {user?.displayName?.split(' ')[0] || 'User'}
+                                            </span>
+                                            <ChevronDown size={14} className={`text-health-text-muted transition-transform ${isProfileOpen ? 'rotate-180' : ''}`} />
+                                        </button>
+
+                                        <AnimatePresence>
+                                            {isProfileOpen && (
+                                                <>
+                                                    <div className="fixed inset-0 z-40" onClick={() => setIsProfileOpen(false)}></div>
+                                                    <motion.div
+                                                        initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                                                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                                                        exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                                                        className="absolute right-0 mt-3 w-56 bg-white border border-health-border rounded-2xl shadow-2xl z-50 overflow-hidden"
+                                                    >
+                                                        <div className="px-5 py-4 border-b border-health-border bg-health-bg/20">
+                                                            <p className="text-[10px] font-bold text-health-text-muted uppercase tracking-widest leading-none mb-2">Account</p>
+                                                            <p className="text-sm font-bold text-primary-navy truncate">{user?.email}</p>
+                                                        </div>
+                                                        <div className="p-2">
+                                                            <Link to="/settings" className="flex items-center px-4 py-2.5 text-sm font-bold text-health-text-secondary hover:bg-primary-teal/5 hover:text-primary-teal rounded-xl transition-colors">
+                                                                <User size={16} className="mr-3" />
+                                                                My Profile
+                                                            </Link>
+                                                            <Link to="/settings" className="flex items-center px-4 py-2.5 text-sm font-bold text-health-text-secondary hover:bg-primary-teal/5 hover:text-primary-teal rounded-xl transition-colors">
+                                                                <Settings size={16} className="mr-3" />
+                                                                Settings
+                                                            </Link>
+                                                            <div className="my-1 border-t border-health-border"></div>
+                                                            <button
+                                                                onClick={() => { logout(); setIsProfileOpen(false); }}
+                                                                className="w-full flex items-center px-4 py-2.5 text-sm font-bold text-health-danger hover:bg-health-danger/5 rounded-xl transition-colors"
+                                                            >
+                                                                <LogOut size={16} className="mr-3" />
+                                                                Sign Out
+                                                            </button>
+                                                        </div>
+                                                    </motion.div>
+                                                </>
+                                            )}
+                                        </AnimatePresence>
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="hidden lg:flex items-center space-x-4">
+                                    <Link to="/login" className="text-sm font-bold text-primary-navy hover:text-primary-teal transition-colors px-4">
+                                        Login
+                                    </Link>
+                                    <Link to="/signup" className="btn-primary !py-2.5 !px-6 !rounded-xl text-sm">
+                                        Sign Up
                                     </Link>
                                 </div>
                             )}
+
+                            {/* Mobile menu button */}
+                            <button
+                                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                                className="lg:hidden p-2.5 bg-health-bg rounded-xl text-primary-navy hover:text-primary-teal transition-colors"
+                            >
+                                {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+                            </button>
                         </div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
-        </nav>
+                    </div>
+                </div>
+
+                {/* Mobile menu */}
+                <AnimatePresence>
+                    {isMobileMenuOpen && (
+                        <motion.div
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: 'auto', opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            className="lg:hidden bg-white border-t border-health-border overflow-hidden"
+                        >
+                            <div className="px-4 py-6 space-y-2">
+                                {navLinks.map((link) => (
+                                    <Link
+                                        key={link.name}
+                                        to={link.path}
+                                        className="flex items-center space-x-4 px-4 py-3.5 text-base font-bold text-health-text-secondary hover:text-primary-teal hover:bg-primary-teal/5 rounded-2xl transition-all"
+                                        onClick={() => setIsMobileMenuOpen(false)}
+                                    >
+                                        {link.icon && <span>{link.icon}</span>}
+                                        <span>{link.name}</span>
+                                    </Link>
+                                ))}{!isLoggedIn && (
+                                    <div className="pt-4 grid grid-cols-2 gap-4">
+                                        <Link to="/login" className="px-4 py-3.5 bg-health-bg text-primary-navy text-center rounded-2xl font-bold" onClick={() => setIsMobileMenuOpen(false)}>Login</Link>
+                                        <Link to="/signup" className="px-4 py-3.5 bg-primary-teal text-white text-center rounded-2xl font-bold shadow-lg shadow-primary-teal/20" onClick={() => setIsMobileMenuOpen(false)}>Sign Up</Link>
+                                    </div>
+                                )}
+                            </div>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+            </nav>
+        </header>
     );
 };
 

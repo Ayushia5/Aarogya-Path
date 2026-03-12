@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
     Grid, Bookmark, Shield, PiggyBank,
     TrendingUp, ArrowUpRight,
-    ChevronRight, Activity
+    ChevronRight, Activity, Info, Plus, BarChart3
 } from 'lucide-react';
 import {
     AreaChart, Area, XAxis, YAxis,
@@ -15,9 +15,8 @@ import RiskGauge from '../../components/RiskGauge/RiskGauge';
 import useAuthStore from '../../stores/useAuthStore';
 import useEstimatorStore from '../../stores/useEstimatorStore';
 import { db } from '../../services/firebaseConfig';
-import { collection, query, where, getCountFromServer, doc, getDoc, onSnapshot } from 'firebase/firestore';
+import { collection, query, where, doc, onSnapshot } from 'firebase/firestore';
 import { sampleProviders, infrastructureGaps } from '../../data/providersData';
-import { Info } from 'lucide-react';
 
 const initialChartData = [
     { name: 'Today', value: 0 },
@@ -38,7 +37,6 @@ const Dashboard = () => {
         let unsubscribeEstimates = () => {};
 
         if (user?.uid) {
-            // First: Estimates Listener
             const estimatesQuery = query(
                 collection(db, 'estimates'),
                 where('userId', '==', user.uid)
@@ -49,7 +47,6 @@ const Dashboard = () => {
                 snapshot.forEach(doc => {
                     fetchedEstimates.push({ id: doc.id, ...doc.data() });
                 });
-                // Sort by date created
                 fetchedEstimates.sort((a, b) => {
                     const d1 = a.createdAt?.toDate ? a.createdAt.toDate() : new Date();
                     const d2 = b.createdAt?.toDate ? b.createdAt.toDate() : new Date();
@@ -60,7 +57,6 @@ const Dashboard = () => {
                 console.error("Error fetching estimates:", error);
             });
 
-            // Second: Saved Providers Listener
             const userDocRef = doc(db, 'users', user.uid);
             unsubscribeUser = onSnapshot(userDocRef, (docSnap) => {
                 if (docSnap.exists()) {
@@ -88,7 +84,6 @@ const Dashboard = () => {
 
     const firstName = user?.displayName ? user.displayName.split(' ')[0] : 'Sarah';
 
-    // Real Data calculations
     const displayEstimates = estimates.length > 0 
         ? estimates.map(e => ({ name: new Date(e.createdAt?.toDate() || Date.now()).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }), value: e.estimatedCost })) 
         : initialChartData;
@@ -97,7 +92,7 @@ const Dashboard = () => {
     savedProviders.forEach(p => {
         const costStr = p.estimatedCost.replace('₹', '').replace(',', '');
         const costNum = parseInt(costStr, 10);
-        if(!isNaN(costNum)) totalSavings += costNum * 0.15; // Rough estimate of savings via platform
+        if(!isNaN(costNum)) totalSavings += costNum * 0.15;
     });
 
     const averageRisk = estimates.length > 0 
@@ -105,78 +100,63 @@ const Dashboard = () => {
         : 20;
 
     const riskLabel = averageRisk > 40 ? "HIGH RISK" : averageRisk > 15 ? "MEDIUM RISK" : "SAFE ZONE";
-    const riskColor = averageRisk > 40 ? "#E05252" : averageRisk > 15 ? "#F5A623" : "#4CAF7D";
+    const riskColor = averageRisk > 40 ? "#E05252" : averageRisk > 15 ? "#F5A623" : "#0FB1B1";
 
     return (
-        <div className="max-w-7xl mx-auto px-4 py-10 space-y-10">
+        <div className="max-w-7xl mx-auto px-4 py-16 space-y-12">
             {/* Header section */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between space-y-4 md:space-y-0">
+            <div className="flex flex-col md:flex-row md:items-end justify-between space-y-6 md:space-y-0 border-b border-health-border pb-10">
                 <div>
-                    <h1 className="text-4xl font-bold text-primary-navy tracking-tight mb-2">Welcome back, {firstName}</h1>
-                    <p className="text-health-text-secondary text-lg">Here is your healthcare cost and risk overview for this month.</p>
+                    <span className="text-[10px] font-black text-primary-teal uppercase tracking-[0.3em] mb-4 block">Overview</span>
+                    <h1 className="text-4xl md:text-5xl font-black text-primary-navy tracking-tighter leading-none mb-4">
+                        Welcome back, <span className="text-gradient">{firstName}</span>
+                    </h1>
+                    <p className="text-health-text-secondary text-lg font-medium">Monitoring your healthcare costs and risk profiles.</p>
                 </div>
-                <button 
-                    onClick={() => {
-                        useEstimatorStore.getState().resetEstimator();
-                        navigate('/cost-estimator/step-1');
-                    }}
-                    className="btn-primary"
-                >
-                    New Estimate
-                </button>
+                <div className="flex space-x-4">
+                    <button 
+                        onClick={() => {
+                            useEstimatorStore.getState().resetEstimator();
+                            navigate('/cost-estimator/step-1');
+                        }}
+                        className="btn-primary shadow-xl shadow-primary-teal/20"
+                    >
+                        <Plus size={18} />
+                        <span>New Estimate</span>
+                    </button>
+                </div>
             </div>
 
-            {/* Preventive Health Tip */}
-            <motion.div 
-                initial={{ opacity: 0, y: -10 }} 
-                animate={{ opacity: 1, y: 0 }}
-                className="bg-primary-teal/10 border border-primary-teal/20 rounded-2xl p-4 flex items-start space-x-4 shadow-sm"
-            >
-                <div className="p-2 bg-primary-teal/20 rounded-full text-primary-teal shrink-0">
-                    <Info size={20} />
-                </div>
-                <div>
-                    <h4 className="text-sm font-bold text-primary-navy mb-1">Personalized Preventive Tip</h4>
-                    <p className="text-sm text-health-text-secondary leading-relaxed">
-                        {dailyTip}
-                    </p>
-                </div>
-            </motion.div>
-
             {/* KPI Cards Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
                 <KPICard
                     title="Total Estimates"
                     value={estimates.length}
                     trend="Historical"
-                    icon={<Grid size={24} />}
-                    iconBgColor="bg-blue-500/10"
-                    iconColor="text-blue-500"
+                    icon={<Grid size={20} />}
+                    iconBgColor="bg-blue-50 text-blue-600"
                 />
                 <KPICard
                     title="Providers Saved"
                     value={savedProviders.length}
                     trend="In network"
-                    icon={<Bookmark size={24} />}
-                    iconBgColor="bg-purple-500/10"
-                    iconColor="text-purple-500"
+                    icon={<Bookmark size={20} />}
+                    iconBgColor="bg-purple-50 text-purple-600"
                 />
                 <KPICard
                     title="Average Risk"
                     value={riskLabel}
-                    trend="Based on estimates"
-                    icon={<Shield size={24} />}
-                    iconBgColor="bg-amber-500/10"
-                    iconColor="text-amber-500"
+                    trend="Live Score"
+                    icon={<Shield size={20} />}
+                    iconBgColor="bg-amber-50 text-amber-600"
                 />
                 <KPICard
-                    title="Estimated Savings"
+                    title="Est. Savings"
                     value={Math.round(totalSavings)}
-                    trend="+15% overall"
+                    trend="+15% Projected"
                     isCurrency={true}
-                    icon={<PiggyBank size={24} />}
-                    iconBgColor="bg-primary-teal/10"
-                    iconColor="text-primary-teal"
+                    icon={<PiggyBank size={20} />}
+                    iconBgColor="bg-teal-50 text-teal-600"
                 />
             </div>
 
@@ -185,56 +165,62 @@ const Dashboard = () => {
                 <motion.div
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
-                    className="lg:col-span-2 card-premium backdrop-blur-md bg-white/70 border border-white/20 shadow-xl shadow-primary-teal/5 p-8"
+                    className="lg:col-span-2 card-premium p-10 relative overflow-hidden group"
                 >
-                    <div className="flex justify-between items-start mb-10">
+                    <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
+                        <BarChart3 size={120} className="text-primary-teal" />
+                    </div>
+                    <div className="flex justify-between items-start mb-12 relative z-10">
                         <div>
-                            <h4 className="text-lg font-bold text-primary-navy mb-1">Estimated Savings Over Time</h4>
-                            <p className="text-sm text-health-text-secondary">Based on provider selection vs. market average</p>
+                            <h4 className="text-xl font-black text-primary-navy mb-2">Estimated Savings</h4>
+                            <p className="text-sm font-medium text-health-text-secondary">Based on provider selection vs. market average</p>
                         </div>
                         <div className="text-right">
-                            <h3 className="text-3xl font-bold text-primary-navy tabular-nums">₹{Math.round(totalSavings).toLocaleString('en-IN')}</h3>
-                            <p className="text-xs font-bold text-health-success flex items-center justify-end">
-                                <TrendingUp size={14} className="mr-1" />
-                                Projecting based on selections
+                            <h3 className="text-4xl font-black text-primary-teal tabular-nums">₹{Math.round(totalSavings).toLocaleString('en-IN')}</h3>
+                            <p className="text-[10px] font-black text-health-success flex items-center justify-end uppercase tracking-widest mt-2">
+                                <TrendingUp size={14} className="mr-2" />
+                                Optimal Projection
                             </p>
                         </div>
                     </div>
 
-                    <div className="h-64 w-full">
+                    <div className="h-72 w-full relative z-10">
                         <ResponsiveContainer width="100%" height="100%">
                             <AreaChart data={displayEstimates}>
                                 <defs>
                                     <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="5%" stopColor="#0B9E9E" stopOpacity={0.1} />
-                                        <stop offset="95%" stopColor="#0B9E9E" stopOpacity={0} />
+                                        <stop offset="5%" stopColor="#0FB1B1" stopOpacity={0.2} />
+                                        <stop offset="95%" stopColor="#0FB1B1" stopOpacity={0} />
                                     </linearGradient>
                                 </defs>
-                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
+                                <CartesianGrid strokeDasharray="8 8" vertical={false} stroke="#F1F5F9" />
                                 <XAxis
                                     dataKey="name"
                                     axisLine={false}
                                     tickLine={false}
-                                    tick={{ fill: '#9AAAB8', fontSize: 10, fontWeight: 700 }}
-                                    interval="preserveStartEnd"
+                                    tick={{ fill: '#64748B', fontSize: 11, fontWeight: 700 }}
+                                    dy={15}
                                 />
                                 <YAxis hide={true} />
                                 <Tooltip
                                     contentStyle={{
-                                        borderRadius: '12px',
+                                        borderRadius: '24px',
                                         border: 'none',
-                                        boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1)',
-                                        fontSize: '12px'
+                                        backgroundColor: '#0A2540',
+                                        color: '#fff',
+                                        boxShadow: '0 20px 50px rgba(0,0,0,0.1)',
+                                        padding: '16px'
                                     }}
+                                    itemStyle={{ color: '#0FB1B1', fontWeight: 800 }}
                                 />
                                 <Area
                                     type="monotone"
                                     dataKey="value"
-                                    stroke="#0B9E9E"
-                                    strokeWidth={3}
+                                    stroke="#0FB1B1"
+                                    strokeWidth={4}
                                     fillOpacity={1}
                                     fill="url(#colorValue)"
-                                    animationDuration={1500}
+                                    animationDuration={2000}
                                 />
                             </AreaChart>
                         </ResponsiveContainer>
@@ -245,102 +231,126 @@ const Dashboard = () => {
                 <motion.div
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
-                    className="card-premium backdrop-blur-md bg-white/70 border border-white/20 shadow-xl shadow-primary-teal/5 p-8 flex flex-col items-center text-center justify-between"
+                    className="card-premium p-10 flex flex-col items-center text-center justify-between group"
                 >
-                    <div className="w-full">
-                        <h4 className="text-lg font-bold text-primary-navy mb-1">Personalized Cost Risk</h4>
-                        <p className="text-sm text-health-text-secondary mb-8">Average risk profile across your estimates</p>
+                    <div className="w-full text-left mb-10">
+                        <h4 className="text-xl font-black text-primary-navy mb-2">Cost Risk Profile</h4>
+                        <p className="text-sm font-medium text-health-text-secondary">Comprehensive exposure benchmark</p>
                     </div>
 
-                    <RiskGauge value={averageRisk} label={riskLabel} color={riskColor} />
+                    <div className="relative py-4 scale-110">
+                        <RiskGauge value={averageRisk} label={riskLabel} color={riskColor} />
+                    </div>
 
-                    <div className="w-full space-y-6 mt-8">
-                        <div className="space-y-2">
-                            <div className="flex justify-between text-xs font-bold uppercase tracking-wider">
-                                <span className="text-health-text-secondary">Avg Pricing Delta</span>
-                                <span className="text-primary-navy">-12% estimated</span>
+                    <div className="w-full space-y-8 mt-12 bg-health-bg/50 p-6 rounded-[32px] border border-health-border">
+                        <div className="space-y-3">
+                            <div className="flex justify-between text-[9px] font-black uppercase tracking-[0.2em] mb-1">
+                                <span className="text-health-text-muted">Avg Pricing Delta</span>
+                                <span className="text-primary-teal">-12% Saved</span>
                             </div>
-                            <div className="w-full h-2 bg-health-bg rounded-full overflow-hidden">
-                                <div className="h-full bg-primary-teal rounded-full" style={{ width: '88%' }}></div>
+                            <div className="w-full h-2.5 bg-white rounded-full overflow-hidden shadow-inner">
+                                <motion.div 
+                                    initial={{ width: 0 }}
+                                    whileInView={{ width: '88%' }}
+                                    transition={{ duration: 1.5, ease: "easeOut" }}
+                                    className="h-full bg-primary-teal rounded-full"
+                                ></motion.div>
                             </div>
                         </div>
 
-                        <div className="space-y-2">
-                            <div className="flex justify-between text-xs font-bold uppercase tracking-wider">
-                                <span className="text-health-text-secondary">Potential Savings</span>
-                                <span className="text-primary-teal">₹{Math.round(totalSavings).toLocaleString('en-IN')}/yr</span>
+                        <div className="space-y-3">
+                            <div className="flex justify-between text-[9px] font-black uppercase tracking-[0.2em] mb-1">
+                                <span className="text-health-text-muted">Network Coverage</span>
+                                <span className="text-primary-navy">78% Optimal</span>
                             </div>
-                            <div className="w-full h-2 bg-health-bg rounded-full overflow-hidden">
-                                <div className="h-full bg-primary-teal rounded-full" style={{ width: '45%' }}></div>
+                            <div className="w-full h-2.5 bg-white rounded-full overflow-hidden shadow-inner">
+                                <motion.div 
+                                    initial={{ width: 0 }}
+                                    whileInView={{ width: '78%' }}
+                                    transition={{ duration: 1.5, ease: "easeOut", delay: 0.2 }}
+                                    className="h-full bg-primary-navy rounded-full"
+                                ></motion.div>
                             </div>
                         </div>
                     </div>
 
-                    <div className="mt-8 pt-6 border-t border-health-border w-full">
-                        <p className="text-xs text-health-text-secondary">
-                            Your costs are optimized relative to <span className="text-primary-navy font-bold">regional averages</span>.
-                        </p>
-                    </div>
+                    <Link to="/cost-estimator/step-1" className="mt-8 text-xs font-black text-primary-teal flex items-center hover:translate-x-1 transition-transform uppercase tracking-widest group">
+                        Recalculate Now <ChevronRight size={14} className="ml-2" />
+                    </Link>
                 </motion.div>
             </div>
 
-            <div className="grid grid-cols-1 gap-8">
+            <div className="grid grid-cols-1 gap-8 pt-8">
                 {/* Saved Providers Table */}
                 <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="card-premium backdrop-blur-md bg-white/70 border border-white/20 shadow-xl shadow-primary-teal/5 overflow-hidden shadow-xl"
+                    initial={{ opacity: 0, y: 30 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    className="card-premium overflow-hidden"
                 >
-                    <div className="p-6 border-b border-health-border flex justify-between items-center">
-                        <h4 className="text-lg font-bold text-primary-navy">Saved Providers</h4>
-                        <a href="/providers" className="text-sm font-bold text-primary-teal hover:underline flex items-center">
-                            View all <ChevronRight size={16} />
-                        </a>
+                    <div className="p-8 border-b border-health-border flex justify-between items-center bg-white">
+                        <div>
+                            <h4 className="text-xl font-black text-primary-navy mb-1">Saved Providers</h4>
+                            <p className="text-sm font-medium text-health-text-secondary">Your preferred medical network</p>
+                        </div>
+                        <Link to="/providers" className="text-xs font-black text-primary-teal hover:text-primary-navy transition-colors flex items-center space-x-2 uppercase tracking-widest">
+                            <span>Browse Catalog</span>
+                            <ArrowUpRight size={16} />
+                        </Link>
                     </div>
                     <div className="overflow-x-auto">
                         <table className="w-full text-left">
                             <thead>
-                                <tr className="bg-health-bg/50">
-                                    <th className="px-6 py-4 text-[10px] font-bold text-health-text-muted uppercase tracking-widest">Provider</th>
-                                    <th className="px-6 py-4 text-[10px] font-bold text-health-text-muted uppercase tracking-widest">Specialty</th>
-                                    <th className="px-6 py-4 text-[10px] font-bold text-health-text-muted uppercase tracking-widest text-right">Est. Cost</th>
-                                    <th className="px-6 py-4 text-[10px] font-bold text-health-text-muted uppercase tracking-widest text-center">Quality</th>
-                                    <th className="px-6 py-4"></th>
+                                <tr className="bg-health-bg/30">
+                                    <th className="px-8 py-5 text-[10px] font-black text-health-text-muted uppercase tracking-[0.2em]">Provider Profile</th>
+                                    <th className="px-8 py-5 text-[10px] font-black text-health-text-muted uppercase tracking-[0.2em]">Category</th>
+                                    <th className="px-8 py-5 text-[10px] font-black text-health-text-muted uppercase tracking-[0.2em] text-right">Est. Cost</th>
+                                    <th className="px-8 py-5 text-[10px] font-black text-health-text-muted uppercase tracking-[0.2em] text-center">Quality Score</th>
+                                    <th className="px-8 py-5"></th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-health-border">
                                 {savedProviders.length === 0 ? (
                                     <tr>
-                                        <td colSpan="5" className="px-6 py-8 text-center text-health-text-muted text-sm">
-                                            You haven't saved any providers yet.
+                                        <td colSpan="5" className="px-8 py-16 text-center">
+                                            <div className="max-w-xs mx-auto">
+                                                <Bookmark size={40} className="mx-auto text-health-bg mb-4" />
+                                                <p className="text-sm font-bold text-health-text-secondary mb-6">You haven't saved any providers yet to your network.</p>
+                                                <Link to="/providers" className="btn-outline !py-2.5 !px-6 text-xs">Explore Providers</Link>
+                                            </div>
                                         </td>
                                     </tr>
                                 ) : (
                                     savedProviders.map((p) => (
-                                        <tr key={p.id} className="hover:bg-health-bg/20 transition-colors group">
-                                            <td className="px-6 py-4">
-                                                <div className="flex items-center space-x-3">
-                                                    <div className="w-8 h-8 rounded-full overflow-hidden bg-primary-teal/10">
-                                                        <img src={p.imageUrl} alt={p.name} />
+                                        <tr key={p.id} className="hover:bg-primary-teal/5 transition-all group">
+                                            <td className="px-8 py-6">
+                                                <div className="flex items-center space-x-4">
+                                                    <div className="w-12 h-12 rounded-2xl overflow-hidden bg-white border border-health-border shadow-sm group-hover:scale-110 transition-transform">
+                                                        <img src={p.imageUrl} alt={p.name} className="w-full h-full object-cover" />
                                                     </div>
-                                                    <span className="text-sm font-bold text-primary-navy">{p.name}</span>
+                                                    <div>
+                                                        <div className="text-sm font-black text-primary-navy group-hover:text-primary-teal transition-colors">{p.name}</div>
+                                                        <div className="text-[10px] font-bold text-health-text-muted uppercase tracking-widest flex items-center mt-1">
+                                                            <MapPin size={10} className="mr-1" /> {p.location}
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </td>
-                                            <td className="px-6 py-4">
-                                                <span className="text-sm text-health-text-secondary">{p.specialty}</span>
+                                            <td className="px-8 py-6">
+                                                <span className="text-xs font-bold text-health-text-secondary">{p.specialty}</span>
                                             </td>
-                                            <td className="px-6 py-4 text-right">
-                                                <span className="text-sm font-bold text-primary-navy tabular-nums">{p.estimatedCost}</span>
+                                            <td className="px-8 py-6 text-right font-black text-primary-navy tabular-nums text-sm">
+                                                {p.estimatedCost}
                                             </td>
-                                            <td className="px-6 py-4 text-center">
-                                                <span className={`text-[10px] font-bold px-2 py-1 rounded-md border-2 ${p.color}`}>
+                                            <td className="px-8 py-6 text-center">
+                                                <span className={`text-[10px] font-black px-3 py-1.5 rounded-full border-2 ${p.color}`}>
                                                     {p.quality}
                                                 </span>
                                             </td>
-                                            <td className="px-6 py-4 text-right">
-                                                <a href={`/providers/${p.id}`} className="text-health-text-muted group-hover:text-primary-teal transition-colors inline-block">
+                                            <td className="px-8 py-6 text-right">
+                                                <Link to={`/providers/${p.id}`} className="w-10 h-10 rounded-xl bg-health-bg flex items-center justify-center text-health-text-muted hover:bg-primary-teal hover:text-white transition-all shadow-sm">
                                                     <ArrowUpRight size={18} />
-                                                </a>
+                                                </Link>
                                             </td>
                                         </tr>
                                     ))
@@ -349,7 +359,6 @@ const Dashboard = () => {
                         </table>
                     </div>
                 </motion.div>
-
             </div>
         </div>
     );

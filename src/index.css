@@ -4,16 +4,24 @@
 
 @layer base {
   :root {
-    --primary-teal: #0B9E9E;
-    --dark-navy: #0D2B3E;
-    --health-bg: #F0F4F7;
+    --primary-teal: #0FB1B1;
+    --primary-teal-dark: #0B9E9E;
+    --primary-teal-light: #E6F7F7;
+    --dark-navy: #0A2540;
+    --health-bg: #F8FAFC;
+    --health-border: #E2E8F0;
+    --glass-bg: rgba(255, 255, 255, 0.7);
+    --glass-border: rgba(255, 255, 255, 0.3);
   }
 
   body {
     @apply text-health-text-primary font-sans antialiased;
-    background: linear-gradient(-45deg, #F0F4F7, #ffffff, #E2F2F2, #F0F4F7);
-    background-size: 400% 400%;
-    animation: gradientBG 15s ease infinite;
+    background-color: var(--health-bg);
+    background-image: 
+      radial-gradient(at 0% 0%, rgba(15, 177, 177, 0.05) 0, transparent 50%), 
+      radial-gradient(at 50% 0%, rgba(10, 37, 64, 0.03) 0, transparent 50%),
+      radial-gradient(at 100% 0%, rgba(15, 177, 177, 0.05) 0, transparent 50%);
+    background-attachment: fixed;
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -34,19 +42,27 @@
 
 @layer components {
   .card-premium {
-    @apply bg-health-card rounded-2xl shadow-premium border border-health-border;
+    @apply bg-white rounded-[32px] shadow-[0_20px_50px_rgba(0,0,0,0.04)] border border-health-border transition-all duration-300;
+  }
+
+  .card-glass {
+    @apply backdrop-blur-md bg-white/70 border border-white/40 rounded-[32px] shadow-lg;
   }
 
   .btn-primary {
-    @apply bg-primary-teal text-white px-6 py-2.5 rounded-lg font-semibold transition-all duration-200 hover:scale-[1.03] hover:shadow-lg active:scale-[0.98];
+    @apply bg-primary-teal text-white px-8 py-3.5 rounded-full font-bold transition-all duration-300 hover:bg-primary-teal-dark hover:shadow-[0_10px_20px_rgba(15,177,177,0.2)] active:scale-[0.98] flex items-center justify-center space-x-2;
   }
 
   .btn-outline {
-    @apply border-2 border-primary-teal text-primary-teal px-6 py-2.5 rounded-lg font-semibold transition-all duration-200 hover:bg-primary-teal/5 hover:scale-[1.03] active:scale-[0.98];
+    @apply border-2 border-primary-teal text-primary-teal px-8 py-3.5 rounded-full font-bold transition-all duration-300 hover:bg-primary-teal/5 active:scale-[0.98] flex items-center justify-center space-x-2;
   }
 
   .input-standard {
-    @apply w-full px-4 py-3 rounded-xl border border-health-border bg-white transition-all duration-200 focus:border-primary-teal focus:ring-0 focus:bg-[#F0FCFC] outline-none;
+    @apply w-full px-6 py-4 rounded-2xl border border-health-border bg-white transition-all duration-300 focus:border-primary-teal focus:ring-4 focus:ring-primary-teal/10 outline-none placeholder:text-health-text-muted;
+  }
+
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-primary-navy to-primary-teal;
   }
 }
 
