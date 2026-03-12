@@ -8,8 +8,10 @@ export default {
     extend: {
       colors: {
         primary: {
-          teal: '#0B9E9E', // Primary Teal
-          navy: '#0D2B3E', // Dark Navy
+          teal: '#0FB1B1',
+          'teal-dark': '#0B9E9E',
+          'teal-light': '#E6F7F7',
+          navy: '#0A2540',
         },
         health: {
           bg: '#F0F4F7',     // Background
