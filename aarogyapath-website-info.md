@@ -1,7 +1,7 @@
-# HealthClear (Aarogya Path) - Website Documentation
+# Aarogya Path (Aarogya Path) - Website Documentation
 
 ## 🌟 Overview
-HealthClear (also known as Aarogya Path) is a comprehensive web application designed to bring transparency, predictability, and AI-driven guidance to the healthcare experience. By empowering patients with accurate cost estimations and an empathetic AI assistant, HealthClear helps users make informed financial and medical decisions before stepping foot in a hospital.
+Aarogya Path (also known as Aarogya Path) is a comprehensive web application designed to bring transparency, predictability, and AI-driven guidance to the healthcare experience. By empowering patients with accurate cost estimations and an empathetic AI assistant, Aarogya Path helps users make informed financial and medical decisions before stepping foot in a hospital.
 
 ## 🚀 Key Features & Benefits
 
