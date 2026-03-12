@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import {
     Grid, Bookmark, Shield, PiggyBank,
     TrendingUp, ArrowUpRight,
-    ChevronRight, Activity, Info, Plus, BarChart3
+    ChevronRight, Activity, Info, Plus, BarChart3, MapPin
 } from 'lucide-react';
 import {
     AreaChart, Area, XAxis, YAxis,
