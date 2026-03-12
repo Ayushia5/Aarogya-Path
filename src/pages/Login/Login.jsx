@@ -71,7 +71,7 @@ const Login = () => {
                         <div className="bg-primary-teal p-1.5 rounded-lg group-hover:rotate-12 transition-transform">
                             <Plus className="text-white" size={20} strokeWidth={3} />
                         </div>
-                        <span className="text-2xl font-black text-primary-navy tracking-tighter">HealthClear</span>
+                        <span className="text-2xl font-black text-primary-navy tracking-tighter">Aarogya Path</span>
                     </Link>
                     <h1 className="text-3xl font-black text-primary-navy tracking-tight mb-2">Welcome Back</h1>
                     <p className="text-health-text-secondary font-medium">Empowering your healthcare journey.</p>
@@ -186,7 +186,7 @@ const Login = () => {
 
                     <div className="mt-10 text-center">
                         <p className="text-xs font-bold text-health-text-secondary">
-                            New to HealthClear?{' '}
+                            New to Aarogya Path?{' '}
                             <Link to="/signup" className="text-primary-teal hover:underline hover:underline-offset-4 transition-all pb-1 font-black">
                                 Create free account
                             </Link>

@@ -240,7 +240,7 @@ const Landing = () => {
                             <img src="https://images.unsplash.com/photo-1579684385127-1ef15d508118?auto=format&fit=crop&q=80&w=800" alt="Clinic Interior" className="w-full aspect-[4/5] object-cover transition-transform duration-700 group-hover:scale-110" />
                             <div className="absolute inset-0 bg-gradient-to-t from-primary-navy via-transparent to-transparent"></div>
                             <div className="absolute bottom-10 left-10 right-10 p-10 bg-white/10 backdrop-blur-xl rounded-[40px] border border-white/20">
-                                <p className="text-white text-lg font-bold italic leading-relaxed mb-6">"HealthClear helped me save over ₹2,00,000 on my hip replacement by showing me regional price differences I never knew existed."</p>
+                                <p className="text-white text-lg font-bold italic leading-relaxed mb-6">"Aarogya Path helped me save over ₹2,00,000 on my hip replacement by showing me regional price differences I never knew existed."</p>
                                 <div className="flex items-center space-x-4">
                                     <img src="https://i.pravatar.cc/100?u=ram" className="w-12 h-12 rounded-full border-2 border-primary-teal" alt="User" />
                                     <div>
@@ -259,7 +259,7 @@ const Landing = () => {
                             {[1, 2].map(i => (
                                 <div key={i} className="flex space-x-6">
                                     <div className="w-1.5 h-auto bg-primary-teal rounded-full opacity-30"></div>
-                                    <p className="text-white/60 text-sm leading-relaxed">HealthClear's estimates were within 5% of my final hospital bill. The accuracy is unmatched and gave me such peace of mind before my surgery.</p>
+                                    <p className="text-white/60 text-sm leading-relaxed">Aarogya Path's estimates were within 5% of my final hospital bill. The accuracy is unmatched and gave me such peace of mind before my surgery.</p>
                                 </div>
                             ))}
                         </div>
@@ -302,7 +302,7 @@ const Landing = () => {
                                 <div className="bg-primary-teal p-1.5 rounded-lg">
                                     <Plus className="text-white" size={18} strokeWidth={3} />
                                 </div>
-                                <span className="text-2xl font-black text-white tracking-tighter">HealthClear</span>
+                                <span className="text-2xl font-black text-white tracking-tighter">Aarogya Path</span>
                             </Link>
                             <p className="text-sm text-white/40 leading-[1.8] mb-8 pr-10">
                                 India's first complete cost risk analysis platform for personalized patient empowerment and bill transparency.
@@ -323,7 +323,7 @@ const Landing = () => {
                     
                     <div className="pt-12 border-t border-white/5 flex flex-col md:flex-row justify-between items-center text-[10px] font-bold text-white/20 uppercase tracking-[0.2em] space-y-6 md:space-y-0">
                         <div className="flex flex-col items-center md:items-start space-y-2">
-                            <div>© 2024 HealthClear. All rights reserved. Built in India.</div>
+                            <div>© 2024 Aarogya Path. All rights reserved. Built in India.</div>
                             <div className="text-primary-teal/40">Developed by Ayushi Aggarwal, GGSIPU First Year Student</div>
                         </div>
                         <div className="flex space-x-12">

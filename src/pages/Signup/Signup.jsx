@@ -74,7 +74,7 @@ const Signup = () => {
                         <div className="bg-primary-teal p-1.5 rounded-lg group-hover:rotate-12 transition-transform">
                             <Plus className="text-white" size={20} strokeWidth={3} />
                         </div>
-                        <span className="text-2xl font-black text-primary-navy tracking-tighter">HealthClear</span>
+                        <span className="text-2xl font-black text-primary-navy tracking-tighter">Aarogya Path</span>
                     </Link>
                     <h1 className="text-3xl font-black text-primary-navy tracking-tight mb-2">Create Account</h1>
                     <p className="text-health-text-secondary font-medium">Join 15,000+ patients managing costs with Aarogya Path.</p>

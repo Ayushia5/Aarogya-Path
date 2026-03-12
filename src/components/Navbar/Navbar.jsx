@@ -52,7 +52,7 @@ const Navbar = () => {
                             </div>
                             <div className="flex flex-col">
                                 <span className="text-xl font-black text-primary-navy tracking-tighter leading-none">
-                                    HealthClear
+                                    Aarogya Path
                                 </span>
                                 <span className="text-[9px] font-bold text-primary-teal uppercase tracking-[0.2em] mt-1">
                                     Aarogya Path
