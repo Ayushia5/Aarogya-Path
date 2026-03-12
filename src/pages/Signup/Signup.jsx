@@ -5,7 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import {
     Mail, Eye, EyeOff, Shield, ArrowRight, User,
-    Github, Chrome
+    Chrome, Plus
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { registerWithEmail, loginWithGoogle } from '../../services/auth';
@@ -40,7 +40,6 @@ const Signup = () => {
         setError('');
         try {
             await registerWithEmail(data.email, data.password);
-            // Additional user profile update logic could go here
             navigate('/dashboard');
         } catch (err) {
             setError(err.message || 'Signup failed. Please try again.');
@@ -59,209 +58,180 @@ const Signup = () => {
     };
 
     return (
-        <div className="min-h-screen pt-0 bg-[#E8EEF3] flex items-center justify-center p-4 relative overflow-hidden">
-            {/* Grid Pattern Overlay */}
-            <div className="absolute inset-0 opacity-10 pointer-events-none"
-                style={{
-                    backgroundImage: `radial-gradient(#0B9E9E 0.5px, transparent 0.5px)`,
-                    backgroundSize: '24px 24px'
-                }}>
-            </div>
+        <div className="min-h-screen bg-health-bg flex items-center justify-center p-6 relative overflow-hidden">
+            {/* Medical Background Elements */}
+            <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-primary-teal/5 rounded-full blur-[150px] -z-10 translate-x-1/2 -translate-y-1/2"></div>
+            <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-primary-navy/5 rounded-full blur-[150px] -z-10 -translate-x-1/2 translate-y-1/2"></div>
 
             <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
+                initial={{ opacity: 0, scale: 0.98 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.5 }}
-                className="max-w-4xl w-full bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col md:flex-row min-h-[700px] relative z-10"
+                className="max-w-xl w-full"
             >
-                {/* Left Panel: Teal Gradient */}
-                <div className="md:w-1/2 bg-gradient-to-br from-[#0B6E6E] to-[#0A9E9E] p-12 text-white flex flex-col justify-between relative overflow-hidden">
-                    <div className="absolute -top-24 -left-24 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>
-                    <div className="absolute -bottom-24 -right-24 w-64 h-64 bg-black/10 rounded-full blur-3xl"></div>
-
-                    <div>
-                        <motion.div
-                            initial={{ y: -20, opacity: 0 }}
-                            animate={{ y: 0, opacity: 1 }}
-                            transition={{ delay: 0.2 }}
-                            className="bg-white/20 w-14 h-14 rounded-2xl flex items-center justify-center mb-8 backdrop-blur-sm"
-                        >
-                            <Shield size={32} />
-                        </motion.div>
-                        <motion.h1
-                            initial={{ x: -20, opacity: 0 }}
-                            animate={{ x: 0, opacity: 1 }}
-                            transition={{ delay: 0.3 }}
-                            className="text-4xl font-bold leading-tight mb-4"
-                        >
-                            Join Aarogya Path Today
-                        </motion.h1>
-                        <motion.p
-                            initial={{ x: -20, opacity: 0 }}
-                            animate={{ x: 0, opacity: 1 }}
-                            transition={{ delay: 0.4 }}
-                            className="text-white/80 text-lg max-w-sm"
-                        >
-                            Start managing your healthcare costs with transparency and ease.
-                        </motion.p>
-                    </div>
-
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ delay: 0.6 }}
-                        className="flex items-center space-x-4"
-                    >
-                        <div className="flex -space-x-3">
-                            {[4, 5, 6].map((i) => (
-                                <img
-                                    key={i}
-                                    src={`https://i.pravatar.cc/100?u=${i}`}
-                                    alt="Avatar"
-                                    className="w-10 h-10 rounded-full border-2 border-white object-cover"
-                                />
-                            ))}
+                <div className="text-center mb-10">
+                    <Link to="/" className="inline-flex items-center space-x-3 mb-8 group">
+                        <div className="bg-primary-teal p-1.5 rounded-lg group-hover:rotate-12 transition-transform">
+                            <Plus className="text-white" size={20} strokeWidth={3} />
                         </div>
-                        <p className="text-sm font-medium text-white/90">
-                            Join thousands of happy patients
-                        </p>
-                    </motion.div>
+                        <span className="text-2xl font-black text-primary-navy tracking-tighter">HealthClear</span>
+                    </Link>
+                    <h1 className="text-3xl font-black text-primary-navy tracking-tight mb-2">Create Account</h1>
+                    <p className="text-health-text-secondary font-medium">Join 15,000+ patients managing costs with Aarogya Path.</p>
                 </div>
 
-                {/* Right Panel: Form */}
-                <div className="md:w-1/2 p-12 flex flex-col justify-center">
-                    <div className="mb-8 text-center md:text-left">
-                        <h2 className="text-3xl font-bold text-primary-navy mb-2">Create Account</h2>
-                        <p className="text-health-text-secondary">Get started with your free account.</p>
-                    </div>
-
-                    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
+                <div className="card-premium p-10 relative overflow-hidden">
+                    <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary-teal to-primary-navy"></div>
+                    
+                    <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+                        <div className="grid grid-cols-2 gap-5">
                             <div>
-                                <label className="block text-sm font-semibold text-health-text-secondary mb-1">
+                                <label className="block text-[10px] font-black text-health-text-muted uppercase tracking-[0.2em] mb-2 px-1">
                                     First Name
                                 </label>
                                 <input
                                     type="text"
                                     {...register('firstName')}
-                                    className={`input-standard px-4 py-2 ${errors.firstName ? 'border-health-danger' : ''}`}
+                                    className={`w-full px-5 py-3 bg-health-bg/50 border rounded-2xl text-sm font-semibold transition-all focus:outline-none focus:ring-4 focus:ring-primary-teal/5 ${
+                                        errors.firstName ? 'border-health-danger' : 'border-health-border focus:border-primary-teal'
+                                    }`}
                                     placeholder="Jane"
                                 />
                                 {errors.firstName && (
-                                    <p className="text-health-danger text-[10px] mt-1">{errors.firstName.message}</p>
+                                    <p className="text-health-danger text-[10px] font-bold mt-1.5 px-1 uppercase tracking-wider">{errors.firstName.message}</p>
                                 )}
                             </div>
                             <div>
-                                <label className="block text-sm font-semibold text-health-text-secondary mb-1">
+                                <label className="block text-[10px] font-black text-health-text-muted uppercase tracking-[0.2em] mb-2 px-1">
                                     Last Name
                                 </label>
                                 <input
                                     type="text"
                                     {...register('lastName')}
-                                    className={`input-standard px-4 py-2 ${errors.lastName ? 'border-health-danger' : ''}`}
+                                    className={`w-full px-5 py-3 bg-health-bg/50 border rounded-2xl text-sm font-semibold transition-all focus:outline-none focus:ring-4 focus:ring-primary-teal/5 ${
+                                        errors.lastName ? 'border-health-danger' : 'border-health-border focus:border-primary-teal'
+                                    }`}
                                     placeholder="Doe"
                                 />
                                 {errors.lastName && (
-                                    <p className="text-health-danger text-[10px] mt-1">{errors.lastName.message}</p>
+                                    <p className="text-health-danger text-[10px] font-bold mt-1.5 px-1 uppercase tracking-wider">{errors.lastName.message}</p>
                                 )}
                             </div>
                         </div>
 
                         <div>
-                            <label className="block text-sm font-semibold text-health-text-secondary mb-1">
+                            <label className="block text-[10px] font-black text-health-text-muted uppercase tracking-[0.2em] mb-2 px-1">
                                 Email Address
                             </label>
                             <div className="relative">
                                 <input
                                     type="email"
                                     {...register('email')}
-                                    className={`input-standard px-4 py-2 pr-10 ${errors.email ? 'border-health-danger' : ''}`}
+                                    className={`w-full px-5 py-3 bg-health-bg/50 border rounded-2xl text-sm font-semibold transition-all focus:outline-none focus:ring-4 focus:ring-primary-teal/5 ${
+                                        errors.email ? 'border-health-danger' : 'border-health-border focus:border-primary-teal'
+                                    }`}
                                     placeholder="jane.doe@example.com"
                                 />
-                                <Mail className="absolute right-3 top-1/2 -translate-y-1/2 text-health-text-muted" size={18} />
+                                <Mail className="absolute right-4 top-1/2 -translate-y-1/2 text-health-text-muted" size={18} />
                             </div>
                             {errors.email && (
-                                <p className="text-health-danger text-[10px] mt-1">{errors.email.message}</p>
+                                <p className="text-health-danger text-[10px] font-bold mt-1.5 px-1 uppercase tracking-wider">{errors.email.message}</p>
                             )}
                         </div>
 
-                        <div>
-                            <label className="block text-sm font-semibold text-health-text-secondary mb-1">
-                                Password
-                            </label>
-                            <div className="relative">
+                        <div className="grid grid-cols-2 gap-5">
+                            <div>
+                                <label className="block text-[10px] font-black text-health-text-muted uppercase tracking-[0.2em] mb-2 px-1">
+                                    Password
+                                </label>
+                                <div className="relative">
+                                    <input
+                                        type={showPassword ? 'text' : 'password'}
+                                        {...register('password')}
+                                        className={`w-full px-5 py-3 bg-health-bg/50 border rounded-2xl text-sm font-semibold transition-all focus:outline-none focus:ring-4 focus:ring-primary-teal/5 ${
+                                            errors.password ? 'border-health-danger' : 'border-health-border focus:border-primary-teal'
+                                        }`}
+                                        placeholder="••••••••"
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowPassword(!showPassword)}
+                                        className="absolute right-4 top-1/2 -translate-y-1/2 text-health-text-muted hover:text-primary-teal"
+                                    >
+                                        {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                                    </button>
+                                </div>
+                                {errors.password && (
+                                    <p className="text-health-danger text-[10px] font-bold mt-1.5 px-1 uppercase tracking-wider">{errors.password.message}</p>
+                                )}
+                            </div>
+                            <div>
+                                <label className="block text-[10px] font-black text-health-text-muted uppercase tracking-[0.2em] mb-2 px-1">
+                                    Confirm
+                                </label>
                                 <input
-                                    type={showPassword ? 'text' : 'password'}
-                                    {...register('password')}
-                                    className={`input-standard px-4 py-2 pr-10 ${errors.password ? 'border-health-danger' : ''}`}
+                                    type="password"
+                                    {...register('confirmPassword')}
+                                    className={`w-full px-5 py-3 bg-health-bg/50 border rounded-2xl text-sm font-semibold transition-all focus:outline-none focus:ring-4 focus:ring-primary-teal/5 ${
+                                        errors.confirmPassword ? 'border-health-danger' : 'border-health-border focus:border-primary-teal'
+                                    }`}
                                     placeholder="••••••••"
                                 />
-                                <button
-                                    type="button"
-                                    onClick={() => setShowPassword(!showPassword)}
-                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-health-text-muted hover:text-primary-teal focus:outline-none"
-                                >
-                                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                                </button>
+                                {errors.confirmPassword && (
+                                    <p className="text-health-danger text-[10px] font-bold mt-1.5 px-1 uppercase tracking-wider">{errors.confirmPassword.message}</p>
+                                )}
                             </div>
-                            {errors.password && (
-                                <p className="text-health-danger text-[10px] mt-1">{errors.password.message}</p>
+                        </div>
+
+                        <div className="pt-2">
+                            {error && (
+                                <div className="bg-health-danger/5 border border-health-danger/20 p-4 rounded-xl text-health-danger text-[11px] font-black text-center uppercase tracking-widest leading-relaxed mb-4">
+                                    {error}
+                                </div>
                             )}
-                        </div>
 
-                        <div>
-                            <label className="block text-sm font-semibold text-health-text-secondary mb-1">
-                                Confirm Password
-                            </label>
-                            <input
-                                type="password"
-                                {...register('confirmPassword')}
-                                className={`input-standard px-4 py-2 ${errors.confirmPassword ? 'border-health-danger' : ''}`}
-                                placeholder="••••••••"
-                            />
-                            {errors.confirmPassword && (
-                                <p className="text-health-danger text-[10px] mt-1">{errors.confirmPassword.message}</p>
-                            )}
-                        </div>
-
-                        {error && (
-                            <p className="text-health-danger text-sm font-medium text-center">{error}</p>
-                        )}
-
-                        <button
-                            type="submit"
-                            disabled={isLoading}
-                            className="btn-primary w-full flex items-center justify-center space-x-2 py-3 disabled:opacity-70 mt-4"
-                        >
-                            <span>{isLoading ? 'Creating Account...' : 'Sign Up'}</span>
-                            {!isLoading && <ArrowRight size={18} />}
-                        </button>
-
-                        <div className="relative flex items-center justify-center py-2">
-                            <div className="border-t border-health-border w-full"></div>
-                            <span className="absolute bg-white px-4 text-[10px] font-bold text-health-text-muted tracking-widest leading-none">
-                                OR SIGN UP WITH
-                            </span>
-                        </div>
-
-                        <div className="grid grid-cols-1 gap-4">
                             <button
-                                type="button"
-                                onClick={handleGoogleLogin}
-                                className="flex items-center justify-center space-x-2 py-2.5 border border-health-border rounded-xl hover:bg-health-bg transition-colors font-semibold text-health-text-secondary text-sm w-full"
+                                type="submit"
+                                disabled={isLoading}
+                                className="btn-primary w-full py-4 text-sm tracking-[0.1em] uppercase font-black shadow-lg shadow-primary-teal/20"
                             >
-                                <Chrome size={16} className="text-health-danger" />
-                                <span>Continue with Google</span>
+                                <span>{isLoading ? 'Creating Account...' : 'Get Started Now'}</span>
+                                {!isLoading && <ArrowRight size={18} className="ml-2" />}
                             </button>
                         </div>
 
-                        <p className="text-center text-xs text-health-text-secondary pt-4">
+                        <div className="relative flex items-center justify-center py-2">
+                            <div className="border-t border-health-border w-full"></div>
+                            <span className="absolute bg-[#F8FAFC] px-4 text-[10px] font-black text-health-text-muted tracking-[0.3em] uppercase">
+                                OR
+                            </span>
+                        </div>
+
+                        <button
+                            type="button"
+                            onClick={handleGoogleLogin}
+                            className="w-full flex items-center justify-center space-x-3 py-3 bg-white border border-health-border rounded-2xl hover:bg-health-bg hover:shadow-xl transition-all shadow-sm"
+                        >
+                            <Chrome size={18} className="text-health-danger" />
+                            <span className="text-sm font-black text-primary-navy tracking-tight">Sign up with Google</span>
+                        </button>
+                    </form>
+
+                    <div className="mt-8 text-center pt-4 border-t border-health-border border-dashed">
+                        <p className="text-xs font-bold text-health-text-secondary">
                             Already have an account?{' '}
-                            <Link to="/login" className="text-primary-teal font-bold hover:underline">
+                            <Link to="/login" className="text-primary-teal hover:underline hover:underline-offset-4 transition-all font-black">
                                 Sign In
                             </Link>
                         </p>
-                    </form>
+                    </div>
+                </div>
+
+                <div className="mt-8 flex items-center justify-center space-x-6 opacity-60">
+                    <div className="flex items-center space-x-2 text-[10px] font-bold text-health-text-muted uppercase tracking-widest">
+                        <Shield size={14} className="text-primary-teal" />
+                        <span>Data Protected</span>
+                    </div>
                 </div>
             </motion.div>
         </div>

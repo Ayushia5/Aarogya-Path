@@ -5,7 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import {
     Mail, Eye, EyeOff, Shield, ArrowRight,
-    Github, Chrome // Using Chrome as Google icon placeholder if Lucide doesn't have Google
+    Chrome, Plus
 } from 'lucide-react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { loginWithEmail, loginWithGoogle } from '../../services/auth';
@@ -40,7 +40,6 @@ const Login = () => {
             navigate(from, { replace: true });
         } catch (err) {
             setError('Invalid email or password. Please try again.');
-            // Shake animation effect could be added here via a state
         } finally {
             setIsLoading(false);
         }
@@ -56,143 +55,95 @@ const Login = () => {
     };
 
     return (
-        <div className="min-h-screen pt-0 bg-[#E8EEF3] flex items-center justify-center p-4 relative overflow-hidden">
-            {/* Grid Pattern Overlay */}
-            <div className="absolute inset-0 opacity-10 pointer-events-none"
-                style={{
-                    backgroundImage: `radial-gradient(#0B9E9E 0.5px, transparent 0.5px)`,
-                    backgroundSize: '24px 24px'
-                }}>
-            </div>
+        <div className="min-h-screen bg-health-bg flex items-center justify-center p-6 relative overflow-hidden">
+            {/* Medical Background Elements */}
+            <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary-teal/5 rounded-full blur-[120px] -z-10 translate-x-1/2 -translate-y-1/2"></div>
+            <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-primary-navy/5 rounded-full blur-[120px] -z-10 -translate-x-1/2 translate-y-1/2"></div>
 
             <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
+                initial={{ opacity: 0, scale: 0.98 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.5 }}
-                className="max-w-4xl w-full bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col md:flex-row min-h-[600px] relative z-10"
+                className="max-w-md w-full"
             >
-                {/* Left Panel: Teal Gradient */}
-                <div className="md:w-1/2 bg-gradient-to-br from-[#0B6E6E] to-[#0A9E9E] p-12 text-white flex flex-col justify-between relative overflow-hidden">
-                    {/* Subtle background decoration */}
-                    <div className="absolute -top-24 -left-24 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>
-                    <div className="absolute -bottom-24 -right-24 w-64 h-64 bg-black/10 rounded-full blur-3xl"></div>
-
-                    <div>
-                        <motion.div
-                            initial={{ y: -20, opacity: 0 }}
-                            animate={{ y: 0, opacity: 1 }}
-                            transition={{ delay: 0.2 }}
-                            className="bg-white/20 w-14 h-14 rounded-2xl flex items-center justify-center mb-8 backdrop-blur-sm"
-                        >
-                            <Shield size={32} />
-                        </motion.div>
-                        <motion.h1
-                            initial={{ x: -20, opacity: 0 }}
-                            animate={{ x: 0, opacity: 1 }}
-                            transition={{ delay: 0.3 }}
-                            className="text-4xl lg:text-5xl font-extrabold text-white leading-tight mb-6"
-                        >
-                            Redefining Healthcare <br /> Transparency with <span className="text-[#A5F3FC]">Aarogya Path</span>
-                        </motion.h1>
-                        <motion.p
-                            initial={{ x: -20, opacity: 0 }}
-                            animate={{ x: 0, opacity: 1 }}
-                            transition={{ delay: 0.4 }}
-                            className="text-white/80 text-lg max-w-sm"
-                        >
-                            Empowering patients with clear cost estimates and provider comparisons for a smarter healthcare journey.
-                        </motion.p>
-                    </div>
-
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ delay: 0.6 }}
-                        className="flex items-center space-x-4"
-                    >
-                        <div className="flex -space-x-3">
-                            {[1, 2, 3].map((i) => (
-                                <img
-                                    key={i}
-                                    src={`https://i.pravatar.cc/100?u=${i}`}
-                                    alt="Avatar"
-                                    className="w-10 h-10 rounded-full border-2 border-white object-cover"
-                                />
-                            ))}
+                <div className="text-center mb-10">
+                    <Link to="/" className="inline-flex items-center space-x-3 mb-8 group">
+                        <div className="bg-primary-teal p-1.5 rounded-lg group-hover:rotate-12 transition-transform">
+                            <Plus className="text-white" size={20} strokeWidth={3} />
                         </div>
-                        <p className="text-sm font-medium text-white/90">
-                            Trusted by 10k+ providers
-                        </p>
-                    </motion.div>
+                        <span className="text-2xl font-black text-primary-navy tracking-tighter">HealthClear</span>
+                    </Link>
+                    <h1 className="text-3xl font-black text-primary-navy tracking-tight mb-2">Welcome Back</h1>
+                    <p className="text-health-text-secondary font-medium">Empowering your healthcare journey.</p>
                 </div>
 
-                {/* Right Panel: Form */}
-                <div className="md:w-1/2 p-12 flex flex-col justify-center">
-                    <div className="mb-10 text-center md:text-left">
-                        <h2 className="text-3xl font-bold text-primary-navy mb-2">Welcome Back</h2>
-                        <p className="text-health-text-secondary">Please enter your details to sign in.</p>
-                    </div>
-
+                <div className="card-premium p-10 relative overflow-hidden">
+                    <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary-teal to-primary-navy"></div>
+                    
                     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
                         <div>
-                            <label className="block text-sm font-semibold text-health-text-secondary mb-2">
+                            <label className="block text-[10px] font-black text-health-text-muted uppercase tracking-[0.2em] mb-2 px-1">
                                 Email Address
                             </label>
                             <div className="relative">
                                 <input
                                     type="email"
                                     {...register('email')}
-                                    className={`input-standard pr-10 ${errors.email ? 'border-health-danger' : ''}`}
+                                    className={`w-full px-5 py-3.5 bg-health-bg/50 border rounded-2xl text-sm font-semibold transition-all focus:outline-none focus:ring-4 focus:ring-primary-teal/5 ${
+                                        errors.email ? 'border-health-danger' : 'border-health-border focus:border-primary-teal'
+                                    }`}
                                     placeholder="name@company.com"
                                 />
                                 <Mail
-                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-health-text-muted"
+                                    className="absolute right-4 top-1/2 -translate-y-1/2 text-health-text-muted"
                                     size={18}
                                 />
                             </div>
                             {errors.email && (
-                                <p className="text-health-danger text-xs mt-1">{errors.email.message}</p>
+                                <p className="text-health-danger text-[10px] font-bold mt-1.5 px-1 uppercase tracking-wider">{errors.email.message}</p>
                             )}
                         </div>
 
                         <div>
-                            <label className="block text-sm font-semibold text-health-text-secondary mb-2">
+                            <label className="block text-[10px] font-black text-health-text-muted uppercase tracking-[0.2em] mb-2 px-1">
                                 Password
                             </label>
                             <div className="relative">
                                 <input
                                     type={showPassword ? 'text' : 'password'}
                                     {...register('password')}
-                                    className={`input-standard pr-10 ${errors.password ? 'border-health-danger' : ''}`}
+                                    className={`w-full px-5 py-3.5 bg-health-bg/50 border rounded-2xl text-sm font-semibold transition-all focus:outline-none focus:ring-4 focus:ring-primary-teal/5 ${
+                                        errors.password ? 'border-health-danger' : 'border-health-border focus:border-primary-teal'
+                                    }`}
                                     placeholder="••••••••"
                                 />
                                 <button
                                     type="button"
                                     onClick={() => setShowPassword(!showPassword)}
-                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-health-text-muted hover:text-primary-teal focus:outline-none"
+                                    className="absolute right-4 top-1/2 -translate-y-1/2 text-health-text-muted hover:text-primary-teal transition-colors"
                                 >
                                     {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                                 </button>
                             </div>
                             {errors.password && (
-                                <p className="text-health-danger text-xs mt-1">{errors.password.message}</p>
+                                <p className="text-health-danger text-[10px] font-bold mt-1.5 px-1 uppercase tracking-wider">{errors.password.message}</p>
                             )}
                         </div>
 
-                        <div className="flex items-center justify-between">
-                            <label className="flex items-center space-x-2 cursor-pointer group">
+                        <div className="flex items-center justify-between px-1 font-bold">
+                            <label className="flex items-center space-x-3 cursor-pointer group">
                                 <input
                                     type="checkbox"
                                     {...register('rememberMe')}
-                                    className="w-4 h-4 rounded border-health-border text-primary-teal focus:ring-primary-teal transition-colors cursor-pointer"
+                                    className="w-5 h-5 rounded-lg border-health-border text-primary-teal focus:ring-primary-teal transition-all cursor-pointer"
                                 />
-                                <span className="text-sm text-health-text-secondary group-hover:text-primary-teal transition-colors">
+                                <span className="text-xs text-health-text-secondary group-hover:text-primary-navy transition-colors">
                                     Remember me
                                 </span>
                             </label>
                             <Link
                                 to="/forgot-password"
-                                className="text-sm font-semibold text-primary-teal hover:underline"
+                                className="text-xs text-primary-teal hover:text-primary-teal-dark transition-colors"
                             >
                                 Forgot Password?
                             </Link>
@@ -200,9 +151,8 @@ const Login = () => {
 
                         {error && (
                             <motion.div
-                                animate={{ x: [0, -5, 5, -5, 5, 0] }}
-                                transition={{ duration: 0.4 }}
-                                className="text-health-danger text-sm font-medium text-center"
+                                animate={{ x: [0, -4, 4, -4, 4, 0] }}
+                                className="bg-health-danger/5 border border-health-danger/20 p-4 rounded-xl text-health-danger text-[11px] font-black text-center uppercase tracking-widest leading-relaxed"
                             >
                                 {error}
                             </motion.div>
@@ -211,37 +161,44 @@ const Login = () => {
                         <button
                             type="submit"
                             disabled={isLoading}
-                            className="btn-primary w-full flex items-center justify-center space-x-2 py-3 disabled:opacity-70"
+                            className="btn-primary w-full py-4 text-sm tracking-[0.1em] uppercase font-black"
                         >
-                            <span>{isLoading ? 'Signing In...' : 'Sign In'}</span>
-                            {!isLoading && <ArrowRight size={18} />}
+                            <span>{isLoading ? 'Processing...' : 'Sign In To Account'}</span>
+                            {!isLoading && <ArrowRight size={18} className="ml-2" />}
                         </button>
 
-                        <div className="relative flex items-center justify-center py-2">
+                        <div className="relative flex items-center justify-center py-4">
                             <div className="border-t border-health-border w-full"></div>
-                            <span className="absolute bg-white px-4 text-xs font-bold text-health-text-muted tracking-widest">
-                                OR CONTINUE WITH
+                            <span className="absolute bg-[#F8FAFC] px-4 text-[10px] font-black text-health-text-muted tracking-[0.3em] uppercase">
+                                OR
                             </span>
                         </div>
 
-                        <div className="grid grid-cols-1 gap-4">
-                            <button
-                                type="button"
-                                onClick={handleGoogleLogin}
-                                className="flex items-center justify-center space-x-2 py-2.5 border border-health-border rounded-xl hover:bg-health-bg transition-colors font-semibold text-health-text-secondary w-full"
-                            >
-                                <Chrome size={18} className="text-health-danger" />
-                                <span>Continue with Google</span>
-                            </button>
-                        </div>
+                        <button
+                            type="button"
+                            onClick={handleGoogleLogin}
+                            className="w-full flex items-center justify-center space-x-3 py-3.5 bg-white border border-health-border rounded-2xl hover:bg-health-bg hover:shadow-xl transition-all shadow-sm group"
+                        >
+                            <Chrome size={20} className="text-health-danger group-hover:scale-110 transition-transform" />
+                            <span className="text-sm font-black text-primary-navy tracking-tight">Continue with Google</span>
+                        </button>
+                    </form>
 
-                        <p className="text-center text-sm text-health-text-secondary pt-4">
-                            Don't have an account?{' '}
-                            <Link to="/signup" className="text-primary-teal font-bold hover:underline">
-                                Sign up for free
+                    <div className="mt-10 text-center">
+                        <p className="text-xs font-bold text-health-text-secondary">
+                            New to HealthClear?{' '}
+                            <Link to="/signup" className="text-primary-teal hover:underline hover:underline-offset-4 transition-all pb-1 font-black">
+                                Create free account
                             </Link>
                         </p>
-                    </form>
+                    </div>
+                </div>
+
+                <div className="mt-12 flex items-center justify-center space-x-6">
+                    <div className="flex items-center space-x-2 text-[10px] font-bold text-health-text-muted uppercase tracking-widest">
+                        <Shield size={14} className="text-primary-teal" />
+                        <span>AES-256 Secured</span>
+                    </div>
                 </div>
             </motion.div>
         </div>

@@ -19,6 +19,19 @@ const About = () => {
                     </p>
                 </motion.div>
 
+                <motion.div
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.2 }}
+                    className="bg-primary-teal/5 border border-primary-teal/10 rounded-[32px] p-8 mb-20 text-center"
+                >
+                    <span className="text-[10px] font-black text-primary-teal uppercase tracking-[0.3em] mb-4 block">The Developer</span>
+                    <h2 className="text-2xl font-black text-primary-navy mb-4">Ayushi Aggarwal</h2>
+                    <p className="text-health-text-secondary text-sm font-medium leading-relaxed max-w-lg mx-auto">
+                        A first-year student from GGSIPU, Ayushi is the visionary developer behind the website and the Aarogya Path application, dedicated to making healthcare transparent for all.
+                    </p>
+                </motion.div>
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-20">
                     <div className="card-premium p-8">
                         <div className="w-12 h-12 bg-primary-teal/10 rounded-xl flex items-center justify-center text-primary-teal mb-6">

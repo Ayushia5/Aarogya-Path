@@ -16,7 +16,7 @@ import useAuthStore from '../../stores/useAuthStore';
 import useEstimatorStore from '../../stores/useEstimatorStore';
 import { db } from '../../services/firebaseConfig';
 import { collection, query, where, doc, onSnapshot } from 'firebase/firestore';
-import { sampleProviders, infrastructureGaps } from '../../data/providersData';
+import { sampleProviders, sampleHospitals, infrastructureGaps } from '../../data/providersData';
 
 const initialChartData = [
     { name: 'Today', value: 0 },
@@ -61,11 +61,27 @@ const Dashboard = () => {
             unsubscribeUser = onSnapshot(userDocRef, (docSnap) => {
                 if (docSnap.exists()) {
                     const savedIds = docSnap.data().savedProviders || [];
-                    const resolvedProviders = savedIds.map(id => sampleProviders.find(p => p.id === id)).filter(Boolean);
+                    const resolvedProviders = savedIds.map(id => {
+                        // Check if it's a doctor (numerical id) or hospital (starts with 'h')
+                        const doctor = sampleProviders.find(p => p.id === id);
+                        if (doctor) return { ...doctor, type: 'Doctor' };
+                        
+                        const hospital = sampleHospitals.find(h => h.id === id);
+                        if (hospital) return { 
+                            ...hospital, 
+                            type: 'Hospital',
+                            specialty: 'Hospital', // hospitals use 'location' usually, but table expects 'specialty'
+                            estimatedCost: hospital.baseCost,
+                            color: 'bg-primary-navy/10 text-primary-navy border-primary-navy/20'
+                        };
+                        
+                        return null;
+                    }).filter(Boolean);
+                    
                     setSavedProviders(resolvedProviders);
                     
                     if (resolvedProviders.length > 0) {
-                        const firstCity = resolvedProviders[0].city;
+                        const firstCity = resolvedProviders[0].city || resolvedProviders[0].location;
                         if (infrastructureGaps[firstCity]) {
                             setDailyTip(`Health Tip for ${firstCity}: ${infrastructureGaps[firstCity].tips}`);
                         }

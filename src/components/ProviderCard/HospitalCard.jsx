@@ -1,10 +1,56 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { MapPin, Star, AlertTriangle, Building2, TrendingUp } from 'lucide-react';
+import { MapPin, Star, AlertTriangle, Building2, TrendingUp, Heart } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import useAuthStore from '../../stores/useAuthStore';
+import { db } from '../../services/firebaseConfig';
+import { doc, getDoc, updateDoc, arrayUnion, arrayRemove } from 'firebase/firestore';
 
 const HospitalCard = ({ hospital, index }) => {
     const navigate = useNavigate();
+    const { user } = useAuthStore();
+    const [isSaved, setIsSaved] = useState(false);
+    const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        const checkSavedStatus = async () => {
+            if (user?.uid) {
+                const docRef = doc(db, 'users', user.uid);
+                const docSnap = await getDoc(docRef);
+                if (docSnap.exists()) {
+                    const saved = docSnap.data().savedProviders || [];
+                    setIsSaved(saved.includes(hospital.id));
+                }
+            }
+        };
+        checkSavedStatus();
+    }, [hospital.id, user]);
+
+    const toggleSave = async (e) => {
+        e.stopPropagation();
+        if (!user?.uid || loading) return;
+        
+        setLoading(true);
+        const docRef = doc(db, 'users', user.uid);
+        try {
+            if (isSaved) {
+                await updateDoc(docRef, {
+                    savedProviders: arrayRemove(hospital.id)
+                });
+                setIsSaved(false);
+            } else {
+                await updateDoc(docRef, {
+                    savedProviders: arrayUnion(hospital.id)
+                });
+                setIsSaved(true);
+            }
+        } catch (error) {
+            console.error("Error toggling save:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return (
         <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -22,10 +68,22 @@ const HospitalCard = ({ hospital, index }) => {
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
                 
                 {hospital.badge && (
-                    <div className="absolute top-4 right-4 !bg-white/90 !text-primary-navy backdrop-blur-md px-3 py-1 rounded-full text-xs font-bold shadow-sm shadow-black/10">
+                    <div className="absolute top-4 left-4 !bg-white/90 !text-primary-navy backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-bold shadow-sm shadow-black/10 uppercase tracking-widest border border-white">
                         {hospital.badge}
                     </div>
                 )}
+
+                <button 
+                    onClick={toggleSave}
+                    disabled={loading}
+                    className={`absolute top-4 right-4 p-2.5 rounded-2xl backdrop-blur-md transition-all z-10 ${
+                        isSaved 
+                            ? 'bg-health-danger text-white border border-health-danger/50' 
+                            : 'bg-white/80 text-health-text-muted hover:text-health-danger hover:bg-white border border-white'
+                    }`}
+                >
+                    <Heart size={18} fill={isSaved ? "currentColor" : "none"} strokeWidth={isSaved ? 0 : 2.5} />
+                </button>
                 
                 <div className="absolute bottom-4 left-4 right-4">
                     <h3 className="text-xl font-bold text-white mb-1 group-hover:text-primary-teal transition-colors">

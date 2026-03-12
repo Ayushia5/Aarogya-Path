@@ -90,13 +90,13 @@ const ProviderCard = ({ provider, index }) => {
                 <button 
                     onClick={toggleSave}
                     disabled={loading}
-                    className={`absolute top-4 right-4 p-2 rounded-full backdrop-blur-md transition-all z-10 ${
+                    className={`absolute top-4 right-4 p-2.5 rounded-2xl backdrop-blur-md transition-all z-10 ${
                         isSaved 
-                            ? 'bg-health-danger/90 text-white' 
-                            : 'bg-white/60 text-health-text-secondary hover:bg-white'
+                            ? 'bg-health-danger text-white border border-health-danger/50' 
+                            : 'bg-white/80 text-health-text-muted hover:text-health-danger hover:bg-white border border-white'
                     }`}
                 >
-                    <Heart size={16} fill={isSaved ? "currentColor" : "none"} />
+                    <Heart size={18} fill={isSaved ? "currentColor" : "none"} strokeWidth={isSaved ? 0 : 2.5} />
                 </button>
             </div>
 

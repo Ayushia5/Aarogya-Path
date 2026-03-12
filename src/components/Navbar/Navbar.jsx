@@ -8,7 +8,6 @@ import {
 } from 'lucide-react';
 import useAuthStore from '../../stores/useAuthStore';
 import { Link, useLocation } from 'react-router-dom';
-import TopBar from './TopBar';
 
 const Navbar = () => {
     const { isLoggedIn, user, logout } = useAuthStore();
@@ -38,8 +37,7 @@ const Navbar = () => {
         ];
 
     return (
-        <header className={`fixed top-0 w-full z-50 transition-all duration-500 ${isScrolled ? '-translate-y-10' : 'translate-y-0'}`}>
-            <TopBar />
+        <header className="fixed top-0 w-full z-50 transition-all duration-500">
             <nav className={`w-full transition-all duration-500 ${
                 isScrolled 
                     ? 'bg-white/95 backdrop-blur-md shadow-xl border-b border-health-border py-2' 

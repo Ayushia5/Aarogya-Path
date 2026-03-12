@@ -322,7 +322,10 @@ const Landing = () => {
                     </div>
                     
                     <div className="pt-12 border-t border-white/5 flex flex-col md:flex-row justify-between items-center text-[10px] font-bold text-white/20 uppercase tracking-[0.2em] space-y-6 md:space-y-0">
-                        <div>© 2024 HealthClear. All rights reserved. Built in India.</div>
+                        <div className="flex flex-col items-center md:items-start space-y-2">
+                            <div>© 2024 HealthClear. All rights reserved. Built in India.</div>
+                            <div className="text-primary-teal/40">Developed by Ayushi Aggarwal, GGSIPU First Year Student</div>
+                        </div>
                         <div className="flex space-x-12">
                             <a href="#" className="hover:text-white transition-colors">Privacy</a>
                             <a href="#" className="hover:text-white transition-colors">Terms</a>
