@@ -1,72 +1,74 @@
-# Aarogya Path (Aarogya Path) - Website Documentation
+# 🏥 Aarogya Path — Project Documentation
 
-## 🌟 Overview
-Aarogya Path (also known as Aarogya Path) is a comprehensive web application designed to bring transparency, predictability, and AI-driven guidance to the healthcare experience. By empowering patients with accurate cost estimations and an empathetic AI assistant, Aarogya Path helps users make informed financial and medical decisions before stepping foot in a hospital.
-
-## 🚀 Key Features & Benefits
-
-### 1. Hospital Cost Estimator
-The core utility of the application is a multi-step cost estimator that calculates the financial impact of upcoming medical procedures based on the user's specific income profile.
-**Benefits:**
-- **Transparency:** Eliminates the shock of hidden healthcare fees by providing accurate price ranges for various procedures (Diagnostic, Orthopedic, Cardiology, etc.).
-- **Financial Planning:** Helps users understand if they can afford a procedure out-of-pocket or if they need to seek financial assistance or verified payment plans.
-- **Customized Risk Analysis:** Tailors the financial risk warnings explicitly to the user's annual income.
-
-### 2. Aarogya Health AI (AI Chat)
-A dedicated, intelligent chatbot integrated directly into the platform, accessible to logged-in users.
-**Benefits:**
-- **Instant Answers:** Powered by Google's Gemma 3 Large Language Model, the AI provides immediate, customized answers to health, procedure, and cost-related questions.
-- **Context-Aware:** The AI remembers the context of the entire conversation session, providing a fluid and cohesive chat experience.
-- **Persistent History:** Chat history is securely saved to Firebase, allowing users to pick up conversations right where they left off across different sessions.
-- **Empathetic Demeanor:** Specifically instructed to act as an empathetic assistant while maintaining safety by advising users to consult real medical professionals for serious concerns.
-
-### 3. Patient Dashboard
-A centralized hub for users to view their health metrics and cost histories.
-**Benefits:**
-- **Overview Metrics:** Displays key performance indicators such as Total Healthcare Spending, Active Claims, and Upcoming Appointments.
-- **Visual Analytics:** Interactive charts to track spending trends over time.
+Aarogya Path is a state-of-the-art, premium healthcare fintech application designed to bridge the gap between medical needs and financial clarity. It empowers patients with AI-driven cost estimations, risk analysis, and a personalized healthcare assistant.
 
 ---
 
-## 🧮 How Things are Calculated (The Formulas)
+## 🛠 Tech Stack
 
-The application utilizes dynamic formulas to provide personalized financial risk assessments during the Cost Estimator flow.
-
-### Financial Risk Score
-The Financial Risk Score dictates whether a user is in the "Safe Zone", "Medium Risk", or "High Risk" category when paying for medical procedures. It compares the cost of the procedures against the user's monthly income.
-
-**1. Calculate Total Estimated Cost:**
-The system looks at all selected procedures, takes the minimum and maximum cost for each, and calculates the average.
-`Total Minimum Cost = Sum(Minimum costs of all selected procedures)`
-`Total Maximum Cost = Sum(Maximum costs of all selected procedures)`
-**`Average Total Cost`** `= (Total Minimum Cost + Total Maximum Cost) / 2`
-
-**2. Calculate Monthly Income:**
-The user inputs their Annual Income via a slider (up to ₹25,00,000+).
-**`Monthly Income`** `= Annual Income / 12`
-
-**3. Calculate the Risk Score:**
-The logic determines how many months of income the procedure will cost. The baseline is that a procedure costing 5 months of income equals a maximum score of 100.
-**`Raw Risk Score`** `= (Average Total Cost / Monthly Income) * 20`
-**`Final Risk Score`** `= Math.min(Raw Risk Score, 100)` *(The score is capped at a maximum of 100)*
-
-### Risk Categorization Logic
-Based on the `Final Risk Score`, the UI triggers different alerts, gauge colors, and statuses:
-
-- **🟢 SAFE ZONE (Low Risk):** `Score < 15`
-  - *Implication:* The cost is less than ~0.75 months of income. Standard insurance or out-of-pocket payment should be manageable.
-- **🟠 MEDIUM RISK:** `15 <= Score < 40`
-  - *Implication:* The cost ranges between roughly 0.75 to 2 months of income. Users are warned that out-of-pocket costs may exceed their immediate monthly savings.
-- **🔴 HIGH RISK:** `Score >= 40`
-  - *Implication:* The cost exceeds 2 months of income. Users receive a critical warning recommending they explore financial assistance or payment plans.
+| Layer | Technology |
+| :--- | :--- |
+| **Frontend** | React 19 (Vite), JavaScript (ES6+) |
+| **Styling** | Tailwind CSS 3.4, Vanilla CSS (Custom Design System) |
+| **Animations** | Framer Motion (Micro-interactions & Page Transitions) |
+| **State Management** | Zustand (Persistent Store for Estimator & Auth) |
+| **Backend/DB** | Firebase (Firestore, Authentication, Cloud Storage) |
+| **AI Engine** | Google Gemini (via `@google/generative-ai` SDK) |
+| **Icons** | Lucide React |
+| **Form Handling** | React Hook Form + Zod (Validation) |
+| **Data Viz** | Recharts (Responsive Health & Spending Trends) |
 
 ---
 
-## 🛠 Technology Stack
-- **Frontend Framework:** React (Vite)
-- **Styling:** Tailwind CSS + Custom CSS (for premium aesthetics)
-- **Animations:** Framer Motion
-- **Icons:** Lucide React
-- **State Management:** Zustand
-- **Authentication & Database:** Firebase (Auth & Firestore)
-- **AI Integration:** Google Generative AI SDK (`gemma-3-27b-it` model via Google AI Studio)
+## 🚀 Core Features
+
+### 1. Precision Cost Estimator
+A multi-step, logic-driven flow that captures procedure types and user financial profiles to generate real-time cost risk assessments.
+- **Procedure Coverage:** Diagnostic, Orthopedic, Cardiology, Maternity, and more.
+- **Dynamic Logic:** Costs are adjusted based on market averages and regional data.
+- **Validation:** Strict Zod-powered validation ensures data integrity at every step.
+
+### 2. Aarogya Health AI
+A deep-integrated healthcare assistant that provides empathetic guidance.
+- **Persistent History:** Uses Firebase to save chat sessions globally.
+- **Memory Management:** Maintains context throughout the user session for fluid dialogue.
+- **Safe Guardrails:** Explicitly configured to provide information while prioritizing professional medical consultation.
+
+### 3. Patient Intelligence Dashboard
+A high-fidelity cockpit for managing healthcare data.
+- **KPI Tracking:** Real-time monitoring of estimates, saved providers, and financial risk.
+- **Risk Gauge:** Visual representation of cost exposure based on monthly income delta.
+- **Network Management:** Seamlessly save and manage "In-Network" doctors and hospitals.
+
+### 4. Advanced Provider Discovery
+- **Hospital Infrastructure Analysis:** Highlights "Infrastructure Gaps" (e.g., missing ICU or advanced radiology) for informed decision-making.
+- **Regional Benchmarking:** Compares facility quality scores against regional averages.
+
+---
+
+## ⚖️ Financial Logic (Risk Model)
+
+Our proprietary risk model evaluates the impact of healthcare costs on a user's liquid financial health:
+
+1. **Monthly Benchmark:** `Annual Income / 12`
+2. **Cost Average:** `(Min Cost + Max Cost) / 2`
+3. **Risk Score:** `(Average Cost / Monthly Income) * 20` (Capped at 100)
+4. **Classification:**
+   - **🟢 Safe Zone (<15):** Cost is < 0.75 months of income.
+   - **🟠 Caution (15-40):** Cost is 0.75 - 2 months of income.
+   - **🔴 High Risk (>40):** Cost exceeds 2 months of income.
+
+---
+
+## 🎨 Design Philosophy: "Medicana"
+The application uses a custom-built design system called **Medicana**, characterized by:
+- **Glassmorphism:** Frosted overlays and translucent cards for a clean, modern feel.
+- **Deep Navy & Teal Palette:** Evokes a sense of trust, professionalism, and high-tech healthcare.
+- **Micro-animations:** Purposeful transitions that guide the user through complex data flows.
+
+---
+
+## 👤 Credits
+**Developed by:** Ayushi Aggarwal  
+**Institution:** GGSIPU (Indraprastha University)  
+**Status:** MVP v1.0 (Production Ready)
