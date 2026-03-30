@@ -17,14 +17,10 @@
                 <h1 style="color: #0f172a; font-size: 2.2rem; display: flex; align-items: center; gap: 12px; margin-bottom: 5px; font-weight: 700;">
                     <i class="fa-solid fa-robot" style="color: var(--primary);"></i> Aarogya Health AI
                 </h1>
-                <p style="color: #64748b; font-size: 0.95rem;">Powered by Gemma 3</p>
             </div>
             <div style="display: flex; gap: 10px;">
                 <button class="btn-primary" onclick="switchView('live-helper-view')" style="border-radius: 8px; font-weight: 500; font-size: 0.9rem; padding: 10px 16px;"><i class="fa-solid fa-camera" style="margin-right: 6px;"></i> Live Helper</button>
                 <button class="btn-secondary" onclick="document.getElementById('chat-messages').innerHTML='';" style="border-radius: 8px; font-weight: 500; font-size: 0.9rem; padding: 10px 16px; background: white;"><i class="fa-solid fa-rotate-right" style="margin-right: 6px;"></i> Clear History</button>
-                <button class="btn secondary" onclick="window.location.href='hospital2.html'" style="border-radius: 8px; font-weight: 500; font-size: 0.9rem; padding: 10px 15px; margin-top: 10px; background: #00a3a3; color: white;">
-    <i class="fa-solid fa-hospital-user" style="margin-right: 8px;"></i> Check Hospital Eligibility
-</button>
             </div>
         </div>
         
@@ -100,11 +96,8 @@
                 </div>
 
                 <div id="companion-controls" style="display: flex; gap: 20px; justify-content: center; margin-top: 10px;">
-                    <button onclick="companionReadMedicine()" style="background: var(--primary); color: white; border: none; padding: 30px; font-size: 1.5rem; font-weight: bold; border-radius: 16px; cursor: pointer; flex: 1; max-width: 300px;">
+                    <button onclick="companionReadMedicine()" style="background: var(--primary); color: white; border: none; padding: 30px; font-size: 1.5rem; font-weight: bold; border-radius: 16px; cursor: pointer; flex: 1; max-width: 400px;">
                         <i class="fa-solid fa-pills" style="font-size: 2.5rem; display: block; margin-bottom: 10px;"></i> Read This<br>Medicine
-                    </button>
-                    <button onclick="companionBookDoctor()" style="background: var(--danger); color: white; border: none; padding: 30px; font-size: 1.5rem; font-weight: bold; border-radius: 16px; cursor: pointer; flex: 1; max-width: 300px;">
-                        <i class="fa-solid fa-phone" style="font-size: 2.5rem; display: block; margin-bottom: 10px;"></i> Call a<br>Doctor
                     </button>
                 </div>
             </div>
@@ -112,6 +105,6 @@
     </div>
 
     <!-- Scripts -->
-    <script src="js/app.js"></script>
+    <script src="js/app.js?v=2"></script>
 </body>
 </html>
