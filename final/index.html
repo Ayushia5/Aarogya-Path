@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aarogya Health AI - Component</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body style="background: var(--bg-color); padding: 40px 20px;">
+    
+    <!-- AI Chat View -->
+    <div id="ai-chat-view" style="max-width: 1000px; margin: 0 auto; width: 100%; height: calc(100vh - 80px); display: flex; flex-direction: column;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 25px;">
+            <div>
+                <h1 style="color: #0f172a; font-size: 2.2rem; display: flex; align-items: center; gap: 12px; margin-bottom: 5px; font-weight: 700;">
+                    <i class="fa-solid fa-robot" style="color: var(--primary);"></i> Aarogya Health AI
+                </h1>
+                <p style="color: #64748b; font-size: 0.95rem;">Powered by Gemma 3</p>
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn-primary" onclick="switchView('live-helper-view')" style="border-radius: 8px; font-weight: 500; font-size: 0.9rem; padding: 10px 16px;"><i class="fa-solid fa-camera" style="margin-right: 6px;"></i> Live Helper</button>
+                <button class="btn-secondary" onclick="document.getElementById('chat-messages').innerHTML='';" style="border-radius: 8px; font-weight: 500; font-size: 0.9rem; padding: 10px 16px; background: white;"><i class="fa-solid fa-rotate-right" style="margin-right: 6px;"></i> Clear History</button>
+                <button class="btn secondary" onclick="window.location.href='hospital2.html'" style="border-radius: 8px; font-weight: 500; font-size: 0.9rem; padding: 10px 15px; margin-top: 10px; background: #00a3a3; color: white;">
+    <i class="fa-solid fa-hospital-user" style="margin-right: 8px;"></i> Check Hospital Eligibility
+</button>
+            </div>
+        </div>
+        
+        <div class="card" style="flex: 1; display: flex; flex-direction: column; background: white; border-radius: 16px; border: 1px solid var(--border-color); overflow: hidden; padding: 0;">
+            <div class="chat-container" id="chat-messages" style="flex: 1; padding: 30px; overflow-y: auto;">
+                <div class="chat-bubble chat-bot">
+                    Hello! I am Aarogya Health AI, your official assistant on HealthClear. How can I help you regarding your medical procedures or cost estimations today?
+                </div>
+            </div>
+            
+            <div style="padding: 20px 20px 5px 20px; background: white;">
+                <div style="background: #f1f5f9; border-radius: 12px; padding: 6px 15px; display: flex; align-items: center; gap: 12px;">
+                    <input type="text" id="chatInput" placeholder="Ask about health concerns, costs, or procedures..." style="flex: 1; border: none; background: transparent; outline: none; font-size: 0.95rem; color: var(--text-main); padding: 12px 0;" onkeypress="handleChatPress(event)">
+                    <button onclick="sendMessage()" style="background: var(--primary); color: white; border: none; width: 40px; height: 40px; border-radius: 8px; cursor: pointer; display: flex; justify-content: center; align-items: center; transition: background 0.2s;"><i class="fa-solid fa-paper-plane" style="font-size: 1rem;"></i></button>
+                </div>
+            </div>
+            <p style="text-align: center; color: #94a3b8; font-size: 0.75rem; padding-bottom: 20px; padding-top: 10px; background: white;">AI can make mistakes. For serious health issues, please consult a real doctor.</p>
+        </div>
+    </div>
+
+    <!-- Live Helper View (Hidden initially) -->
+    <div id="live-helper-view" style="display: none; max-width: 1000px; margin: 0 auto; width: 100%; height: calc(100vh - 80px); flex-direction: column;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 25px;">
+            <div>
+                <h1 style="color: #0f172a; font-size: 2.2rem; display: flex; align-items: center; gap: 12px; margin-bottom: 5px; font-weight: 700;">
+                    <i class="fa-solid fa-camera" style="color: var(--primary);"></i> Live Accessibility Helper
+                </h1>
+                <p style="color: #64748b; font-size: 0.95rem;">Voice-guided drug scanning and assistance.</p>
+            </div>
+            <button class="btn-secondary" onclick="switchView('ai-chat-view')" style="border-radius: 8px; font-weight: 500; font-size: 0.9rem; padding: 10px 16px; background: white;"><i class="fa-solid fa-arrow-left" style="margin-right: 6px;"></i> Back to Chat</button>
+        </div>
+
+        <div class="card" style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px; text-align: center; gap: 30px; border-radius: 16px; background: white; border: 1px solid var(--border-color); overflow: hidden;">
+            <div id="companion-intro" style="display: flex; flex-direction: column; gap: 20px; align-items: center;">
+                <i class="fa-solid fa-hands-holding-circle" style="font-size: 6rem; color: var(--primary);"></i>
+                <h2 style="font-size: 2.2rem;">Namaste. I am here to help you.</h2>
+                <button onclick="startLiveCompanion()" style="background: var(--success); color: white; border: none; padding: 25px 50px; font-size: 1.8rem; font-weight: bold; border-radius: 20px; cursor: pointer; box-shadow: 0 10px 20px rgba(16, 185, 129, 0.3);">
+                    <i class="fa-solid fa-microphone"></i> Start Voice Helper
+                </button>
+            </div>
+
+            <div id="companion-active" style="display: none; width: 100%; flex-direction: column; gap: 20px;">
+                <div style="position: relative; border-radius: 16px; overflow: hidden; max-width: 600px; margin: 0 auto; width: 100%;">
+                    <video id="companion-cam" autoplay playsinline style="width: 100%; background: #000; border-radius: 16px; object-fit: cover;"></video>
+                    
+                    <div id="scan-overlay" style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 191, 165, 0.4); border: 4px solid var(--primary); backdrop-filter: blur(2px);">
+                        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; display: flex; flex-direction: column; align-items: center; gap: 10px;">
+                            <i class="fa-solid fa-expand fa-spin" style="font-size: 4rem;"></i>
+                            <b style="font-size: 1.5rem; text-shadow: 0 0 5px black;">Analyzing Medicine...</b>
+                        </div>
+                    </div>
+
+                    <div style="position: absolute; bottom: 20px; left: 0; width: 100%; text-align: center;">
+                        <span style="background: rgba(0,0,0,0.8); color: white; padding: 15px 30px; border-radius: 30px; font-size: 1.5rem; font-weight: bold;">
+                            <i class="fa-solid fa-microphone fa-beat-fade" id="companion-mic-icon" style="color: var(--success); margin-right: 10px;"></i> <span id="companion-mic-text">Listening...</span>
+                        </span>
+                    </div>
+                </div>
+
+                <div class="card" id="drug-result" style="display: none; flex-direction: column; gap: 10px; max-width: 600px; margin: 0 auto; width: 100%; text-align: left; background: white; border: 2px solid var(--primary);">
+                    <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">
+                        <h2 style="color: var(--primary); font-size: 1.6rem; margin:0;">Paracetamol 500mg</h2>
+                        <span style="background: #d1fae5; color: var(--success); padding: 5px 10px; border-radius: 8px; font-weight: bold;">Analyzed</span>
+                    </div>
+                    <div>
+                        <strong style="color: var(--text-muted); display: block; margin-bottom: 5px;">Primary Uses & Indications:</strong>
+                        <p style="font-size: 1.1rem; margin:0;">Fever reduction, mild to moderate pain relief.</p>
+                    </div>
+                    <div>
+                        <strong style="color: var(--text-muted); display: block; margin-bottom: 5px;">Precautions:</strong>
+                        <p style="font-size: 1.1rem; color: var(--danger); margin:0;">Do not exceed 4000mg per day to avoid liver damage.</p>
+                    </div>
+                </div>
+
+                <div id="companion-controls" style="display: flex; gap: 20px; justify-content: center; margin-top: 10px;">
+                    <button onclick="companionReadMedicine()" style="background: var(--primary); color: white; border: none; padding: 30px; font-size: 1.5rem; font-weight: bold; border-radius: 16px; cursor: pointer; flex: 1; max-width: 300px;">
+                        <i class="fa-solid fa-pills" style="font-size: 2.5rem; display: block; margin-bottom: 10px;"></i> Read This<br>Medicine
+                    </button>
+                    <button onclick="companionBookDoctor()" style="background: var(--danger); color: white; border: none; padding: 30px; font-size: 1.5rem; font-weight: bold; border-radius: 16px; cursor: pointer; flex: 1; max-width: 300px;">
+                        <i class="fa-solid fa-phone" style="font-size: 2.5rem; display: block; margin-bottom: 10px;"></i> Call a<br>Doctor
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/app.js"></script>
+</body>
+</html>
