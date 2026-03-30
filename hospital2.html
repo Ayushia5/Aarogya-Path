@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hospital Eligibility & Requirements</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- React & ReactDOM -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    <!-- Babel -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: #f8fafc; 
+        }
+        .glass { 
+            background: rgba(255, 255, 255, 0.7); 
+            backdrop-filter: blur(12px); 
+            -webkit-backdrop-filter: blur(12px); 
+            border-bottom: 1px solid rgba(226, 232, 240, 0.8); 
+        }
+        .smooth-shadow { 
+            box-shadow: 0 4px 20px -2px rgba(0,0,0,0.05); 
+        }
+        .card-hover { 
+            transition: transform 0.2s ease, box-shadow 0.2s ease; 
+        }
+        .card-hover:hover { 
+            transform: translateY(-4px); 
+            box-shadow: 0 12px 24px -4px rgba(0,0,0,0.1); 
+        }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in-up {
+            animation: fadeInUp 0.6s ease-out;
+        }
+    </style>
+</head>
+<body class="text-slate-800 antialiased selection:bg-blue-100 selection:text-blue-900">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useMemo } = React;
+
+        // 1. Database Schema
+        const categories = [
+          { id: 1, name: "Low-Income/BPL (Ayushman Bharat - PMJAY)", short: "BPL / Ayushman", docs: ["Golden Ayushman Card", "Aadhaar Card", "Ration Card (NFSA)", "Mobile linked to Aadhaar for OTP/Biometric"], icon: "fa-hands-holding-circle" },
+          { id: 2, name: "Central Govt. Employees/Pensioners (CGHS)", short: "CGHS", docs: ["CGHS Plastic Card", "Referral Slip from CGHS Wellness Center (mandatory for private hospitals)", "Latest Payslip/Pension Book"], icon: "fa-building-columns" },
+          { id: 3, name: "State Govt. Employees (State Schemes)", short: "State Scheme", docs: ["State Health ID Card", "Employee ID", "Govt. Identity Proof"], icon: "fa-landmark" },
+          { id: 4, name: "Armed Forces/Veterans (ECHS)", short: "ECHS / Veterans", docs: ["ECHS Smart Card", "Service Book (PPO) copy", "Referral from ECHS Polyclinic", "CSD Canteen Card (as secondary ID)"], icon: "fa-shield-heart" },
+          { id: 5, name: "Corporate/Industrial Workers (ESIC)", short: "ESIC Worker", docs: ["ESIC Pehchan Card (with photo)", "Identity Certificate from Employer", "Latest Monthly Contribution Printout"], icon: "fa-industry" },
+          { id: 6, name: "Senior Citizens (70+ Years - Universal Coverage)", short: "Senior Citizen", docs: ["Aadhaar Card (Age Proof)", "New Universal Ayushman Card (U-HC)", "Income Certificate (optional but recommended)"], icon: "fa-person-cane" },
+          { id: 7, name: "Foreign Nationals/Medical Tourists", short: "Foreign National", docs: ["Original Passport", "Valid Medical Visa (e-Medical Visa)", "FRRO/FRO Registration (if stay exceeds 180 days)", "Referral from Home Country Doctor"], icon: "fa-passport" },
+          { id: 8, name: "NRIs (Non-Resident Indians)", short: "NRI", docs: ["OCI Card/Passport", "Local Guardian Identity Proof", "Self-declaration of NRI status"], icon: "fa-plane-departure" },
+          { id: 9, name: "General/Private Insurance Holders", short: "Private Insurance", docs: ["TPA/Insurance Health Card", "Policy Copy", "Valid Photo ID (PAN/Aadhaar/Voter ID)"], icon: "fa-file-shield" }
+        ];
+
+        const hospitals = [
+          { id: 1, name: "AIIMS New Delhi", city: "New Delhi", type: "Govt Institute", empanelled: [1, 2, 3, 4, 5, 6, 7, 8, 9], image: "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&q=80&w=500", rating: 4.9 },
+          { id: 2, name: "Army Hospital Research & Referral", city: "New Delhi", type: "Military Hospital", empanelled: [4], image: "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&q=80&w=500", rating: 4.8 },
+          { id: 3, name: "Apollo Hospitals", city: "Chennai", type: "Private Giant", empanelled: [2, 4, 7, 8, 9], image: "https://images.unsplash.com/photo-1516549655169-df83a0774514?auto=format&fit=crop&q=80&w=500", rating: 4.7 },
+          { id: 4, name: "Fortis Escorts Heart Institute", city: "New Delhi", type: "Private Giant", empanelled: [2, 7, 8, 9], image: "https://images.unsplash.com/photo-1538108149393-fbbd81895907?auto=format&fit=crop&q=80&w=500", rating: 4.6 },
+          { id: 5, name: "ESIC Model Hospital", city: "Noida", type: "ESIC Dedicated Hospital", empanelled: [5, 1], image: "https://images.unsplash.com/photo-1512678080530-7760d81f148c?auto=format&fit=crop&q=80&w=500", rating: 4.2 },
+          { id: 6, name: "Safdarjung Hospital", city: "New Delhi", type: "Govt Institute", empanelled: [1, 2, 3, 6], image: "https://images.unsplash.com/photo-1551076805-e1869033e561?auto=format&fit=crop&q=80&w=500", rating: 4.5 },
+          { id: 7, name: "Command Hospital (Southern Command)", city: "Pune", type: "Military Hospital", empanelled: [4], image: "https://images.unsplash.com/photo-1587351021759-3e566d6af7cc?auto=format&fit=crop&q=80&w=500", rating: 4.8 },
+          { id: 8, name: "Manipal Hospital", city: "Bangalore", type: "Private Giant", empanelled: [2, 3, 7, 8, 9], image: "https://images.unsplash.com/photo-1519494080410-f9aa76cb4283?auto=format&fit=crop&q=80&w=500", rating: 4.6 },
+          { id: 9, name: "Tata Memorial Hospital", city: "Mumbai", type: "Govt Institute", empanelled: [1, 2, 3, 5, 6, 9], image: "https://images.unsplash.com/photo-1502740523049-361907cb502c?auto=format&fit=crop&q=80&w=500", rating: 4.9 },
+          { id: 10, name: "ESIC Medical College & Hospital", city: "Faridabad", type: "ESIC Dedicated Hospital", empanelled: [5], image: "https://images.unsplash.com/photo-1504439468489-c8920d796a29?auto=format&fit=crop&q=80&w=500", rating: 4.3 }
+        ];
+
+        // 2. Components
+        const IdentityPicker = ({ onSelect }) => {
+            return (
+                <div className="max-w-7xl mx-auto px-4 py-16 w-full flex-1 flex flex-col justify-center animate-fade-in-up">
+                    <div className="text-center mb-12">
+                        <div className="inline-flex items-center justify-center bg-blue-50 text-blue-600 px-4 py-1.5 rounded-full font-bold text-sm mb-4 border border-blue-100">
+                            <i className="fa-solid fa-address-card mr-2"></i> Step 1: Verify Identity
+                        </div>
+                        <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight mb-4 text-slate-900">
+                            Select Your Identity Profile
+                        </h1>
+                        <p className="text-lg text-slate-500 max-w-2xl mx-auto">
+                            To view empanelled hospitals and generate your precise admission checklist, please select your citizen category below.
+                        </p>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 max-w-6xl mx-auto w-full">
+                        {categories.map((cat, idx) => (
+                            <button 
+                                key={cat.id}
+                                onClick={() => onSelect(cat)}
+                                className="group text-left p-6 rounded-2xl bg-white border border-slate-200 smooth-shadow card-hover flex flex-col justify-between h-48"
+                                style={{ animationDelay: `${idx * 0.05}s`, animationFillMode: 'both', animationName: 'fadeInUp', animationDuration: '0.5s' }}
+                            >
+                                <div className="w-12 h-12 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center text-xl mb-4 group-hover:scale-110 transition-transform group-hover:bg-blue-600 group-hover:text-white group-hover:shadow-md">
+                                    <i className={`fa-solid ${cat.icon}`}></i>
+                                </div>
+                                <h3 className="font-bold text-lg text-slate-800 leading-tight mb-2 group-hover:text-blue-600 transition-colors">{cat.name}</h3>
+                                <p className="text-sm font-semibold text-slate-400 flex items-center mt-auto pt-4 group-hover:text-blue-500 transition-colors">
+                                    Select Profile <i className="fa-solid fa-arrow-right ml-2 group-hover:translate-x-1 transition-transform"></i>
+                                </p>
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            );
+        };
+
+        const HospitalCard = ({ hospital, category }) => {
+            const [checklistOpen, setChecklistOpen] = useState(false);
+
+            // Dynamic type badge styling
+            const getTypeStyles = (type) => {
+                if (type.includes("Govt")) return "bg-emerald-50 text-emerald-700 border-emerald-200";
+                if (type.includes("Military")) return "bg-amber-50 text-amber-700 border-amber-200";
+                if (type.includes("ESIC")) return "bg-purple-50 text-purple-700 border-purple-200";
+                return "bg-blue-50 text-blue-700 border-blue-200";
+            };
+
+            return (
+                <div className="bg-white rounded-2xl border border-slate-200 flex flex-col h-full shadow-sm hover:shadow-xl transition-shadow duration-300 relative overflow-visible">
+                    <div className="h-48 relative overflow-hidden bg-slate-200 rounded-t-2xl group z-0">
+                        <img src={hospital.image} alt={hospital.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                        <div className="absolute top-3 right-3 bg-white/95 backdrop-blur-sm px-2.5 py-1 rounded-lg text-sm font-bold shadow-sm flex items-center gap-1 text-slate-800">
+                            <i className="fa-solid fa-star text-amber-400"></i> {hospital.rating}
+                        </div>
+                    </div>
+                    
+                    <div className="p-5 flex flex-col flex-1 bg-white relative z-10 rounded-b-2xl">
+                        <div className="flex items-start justify-between mb-2">
+                            <div>
+                                <span className={`inline-block px-2.5 py-0.5 rounded-md text-[10px] font-bold border mb-2 uppercase tracking-wide ${getTypeStyles(hospital.type)}`}>
+                                    {hospital.type}
+                                </span>
+                                <h3 className="text-xl font-extrabold text-slate-900 leading-tight mb-1">{hospital.name}</h3>
+                                <div className="flex items-center text-slate-500 text-sm font-medium">
+                                    <i className="fa-solid fa-location-dot w-4 text-center mr-1 text-slate-400"></i> {hospital.city}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div className="mt-auto pt-5 border-t border-slate-100">
+                            <button 
+                                onClick={() => setChecklistOpen(!checklistOpen)} 
+                                className={`w-full flex items-center justify-between p-3 rounded-xl font-semibold transition-all duration-200 text-left ${checklistOpen ? 'bg-blue-50 text-blue-700 border border-blue-100' : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border border-transparent'}`}
+                            >
+                                <span className="flex items-center gap-2 text-sm sm:text-base">
+                                    <i className={`text-lg ${checklistOpen ? 'fa-solid fa-clipboard-check text-blue-600' : 'fa-regular fa-clipboard text-slate-400'}`}></i> 
+                                    What to Carry
+                                </span>
+                                <i className={`fa-solid fa-chevron-down shrink-0 transition-transform duration-300 ${checklistOpen ? 'rotate-180 text-blue-600' : 'text-slate-400'}`}></i>
+                            </button>
+                            
+                            <div className={`overflow-hidden transition-all duration-300 ease-in-out ${checklistOpen ? 'max-h-96 opacity-100 mt-2' : 'max-h-0 opacity-0'}`}>
+                                <div className="p-4 bg-blue-50/50 border border-blue-100 rounded-xl">
+                                    <p className="text-[11px] font-bold text-blue-600 uppercase tracking-wider mb-2 flex items-center gap-1">
+                                        <i className="fa-solid fa-circle-exclamation"></i> Mandatory Documents
+                                    </p>
+                                    <ul className="space-y-2.5 m-0 mb-0">
+                                        {category.docs.map((doc, i) => (
+                                            <li key={i} className="flex items-start gap-2.5 text-sm text-slate-700">
+                                                <i className="fa-solid fa-check text-emerald-500 mt-1 text-xs font-bold shrink-0"></i>
+                                                <span className="leading-snug font-medium pt-0.5">{doc}</span>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const Dashboard = ({ category, onChangeCategory, searchQuery, setSearchQuery }) => {
+            const filteredHospitals = useMemo(() => {
+                let result = hospitals.filter(h => h.empanelled.includes(category.id));
+                if (searchQuery) {
+                    const lowerQ = searchQuery.toLowerCase();
+                    result = result.filter(h => 
+                        h.name.toLowerCase().includes(lowerQ) || 
+                        h.city.toLowerCase().includes(lowerQ)
+                    );
+                }
+                return result;
+            }, [category, searchQuery]);
+
+            return (
+                <div className="flex-1 bg-slate-50 animate-fade-in-up flex flex-col min-h-[calc(100vh-64px)]">
+                    <div className="bg-white border-b border-slate-200 pb-8 pt-6 shadow-sm sticky top-16 z-30 transition-all">
+                        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                            <button onClick={onChangeCategory} className="text-sm font-semibold text-slate-500 hover:text-blue-600 mb-6 inline-flex items-center transition-colors">
+                                <i className="fa-solid fa-arrow-left mr-2"></i> Switch Identity Profile
+                            </button>
+                            
+                            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+                                <div>
+                                    <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-50 text-blue-700 text-sm font-bold mb-3 border border-blue-100 shadow-sm">
+                                        <i className={`fa-solid ${category.icon}`}></i> {category.name}
+                                    </div>
+                                    <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight">
+                                        Empanelled Hospitals
+                                    </h2>
+                                    <p className="text-slate-500 mt-1 font-medium">Displaying qualified facilities based on your identity</p>
+                                </div>
+                                
+                                <div className="relative w-full md:w-80">
+                                    <i className="fa-solid fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                                    <input 
+                                        type="text"
+                                        placeholder="Search by city or name..." 
+                                        value={searchQuery}
+                                        onChange={(e) => setSearchQuery(e.target.value)}
+                                        className="w-full pl-11 pr-10 py-3 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all shadow-sm font-medium"
+                                    />
+                                    {searchQuery && (
+                                        <button onClick={() => setSearchQuery('')} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+                                            <i className="fa-solid fa-times-circle"></i>
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 w-full">
+                        {filteredHospitals.length === 0 ? (
+                            <div className="text-center py-24 bg-white rounded-2xl border border-dashed border-slate-300">
+                                <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center text-slate-400 mx-auto mb-4 text-2xl border-2 border-slate-100">
+                                    <i className="fa-solid fa-hospital-user text-slate-300"></i>
+                                </div>
+                                <h3 className="text-xl font-bold text-slate-800">No matching hospitals found</h3>
+                                <p className="text-slate-500 max-w-md mx-auto mt-2 font-medium">We couldn't find any hospitals matching your search criteria for the selected profile.</p>
+                                <button onClick={() => setSearchQuery("")} className="mt-6 px-4 py-2 bg-blue-50 text-blue-600 font-bold rounded-lg hover:bg-blue-100 transition-colors">Clear your search</button>
+                            </div>
+                        ) : (
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 content-start">
+                                {filteredHospitals.map(hospital => (
+                                    <HospitalCard key={hospital.id} hospital={hospital} category={category} />
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        };
+
+        const App = () => {
+            const [selectedCategory, setSelectedCategory] = useState(null);
+            const [searchQuery, setSearchQuery] = useState("");
+            
+            useEffect(() => {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                setSearchQuery("");
+            }, [selectedCategory]);
+
+            return (
+                <div className="min-h-screen pb-20 relative flex flex-col bg-slate-50">
+                    <header className="fixed top-0 w-full z-40 glass">
+                        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+                            <div className="flex items-center gap-3 cursor-pointer group" onClick={() => setSelectedCategory(null)}>
+                                <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-blue-600 to-cyan-500 flex items-center justify-center text-white shadow-md group-hover:shadow-lg transition-all transform group-hover:-translate-y-0.5">
+                                    <i className="fa-solid fa-heart-pulse text-sm"></i>
+                                </div>
+                                <span className="font-extrabold text-xl tracking-tight text-slate-800">
+                                    Aarogya<span className="text-blue-600">Path</span>
+                                </span>
+                            </div>
+                            {selectedCategory && (
+                                <div className="hidden sm:flex text-xs font-bold text-slate-500 items-center gap-2">
+                                    <span>Profile Active</span>
+                                    <span className="relative flex h-2.5 w-2.5">
+                                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                      <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+                                    </span>
+                                </div>
+                            )}
+                        </div>
+                    </header>
+
+                    <main className="flex-1 mt-16 flex flex-col shrink-0">
+                        {!selectedCategory ? (
+                            <IdentityPicker onSelect={setSelectedCategory} />
+                        ) : (
+                            <Dashboard 
+                                category={selectedCategory} 
+                                onChangeCategory={() => setSelectedCategory(null)}
+                                searchQuery={searchQuery}
+                                setSearchQuery={setSearchQuery}
+                            />
+                        )}
+                    </main>
+
+                    {/* Emergency Sticky Banner */}
+                    <div className="fixed bottom-0 w-full z-50 bg-gradient-to-r from-rose-600 to-red-600 shadow-[0_-8px_20px_-10px_rgba(225,29,72,0.5)]">
+                        <div className="max-w-7xl mx-auto px-4 py-3 sm:px-6 lg:px-8 flex items-center gap-4 text-white">
+                            <div className="bg-white/20 p-2.5 rounded-full hidden sm:block shadow-inner drop-shadow-sm">
+                                <i className="fa-solid fa-triangle-exclamation text-lg animate-pulse text-rose-100"></i>
+                            </div>
+                            <div className="flex-1 flex flex-col sm:flex-row sm:items-center sm:gap-4 md:gap-8 justify-between">
+                                <div>
+                                    <p className="font-extrabold text-sm tracking-wide flex items-center gap-2">
+                                        <i className="fa-solid fa-scale-balanced sm:hidden"></i> LEGAL NOTICE: RIGHT TO CARE
+                                    </p>
+                                    <p className="text-xs sm:text-sm text-rose-50 opacity-95 mt-0.5 font-medium leading-snug">
+                                        Under law, no hospital (Govt/Private) can deny emergency stabilization. Documentation constraints apply <u>only</u> after life-saving care.
+                                    </p>
+                                </div>
+                                <div className="hidden md:inline-flex shrink-0 px-4 py-1.5 rounded-full bg-white/10 border border-white/20 transition-colors text-xs font-bold items-center gap-2 cursor-default">
+                                    Section 12: Clinical Entitlement
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
